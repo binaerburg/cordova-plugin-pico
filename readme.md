@@ -4,8 +4,7 @@ Git auschecken und mittels
 ionic cordova plugin add ../Pico
 ```
 
-hinzufügen bzw im gleichen ordner wie ionic projekt. dann gehts vielleicht schon
-
+hinzufügen
 
 
 
