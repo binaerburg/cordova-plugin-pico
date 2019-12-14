@@ -5,7 +5,7 @@ module.exports.coolMethod = function (arg0, success, error) {
 };
 
 
-module.exports.connectToPico = function (arg0, success, error) {
-    exec(success,error,"Pico", "connectToPico", [arg0])
+module.exports.connect = function (arg0, success, error) {
+    exec(success,error,"Pico", "connect", [arg0])
 };
 

@@ -5,11 +5,11 @@
 @interface Pico : CDVPlugin
 
 - (void)coolMethod:(CDVInvokedUrlCommand*)command;
-- (void)connectToPico:(CDVInvokedUrlCommand*)command;
+- (void)connect:(CDVInvokedUrlCommand*)command;
 @end
 
 @implementation Pico
-- (void)connectToPico:(CDVInvokedUrlCommand*)command
+- (void)connect:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
     NSString* echo = [command.arguments objectAtIndex:0];
