@@ -15,6 +15,7 @@
     NSString* echo = [command.arguments objectAtIndex:0];
 
     if(true){
+
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:echo];
 
     } else {
