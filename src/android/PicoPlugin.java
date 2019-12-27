@@ -26,7 +26,8 @@ import com.palette.picoio.utils.Permissions;
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener{
 
     private static final int REQUEST_PERMISSION_LOCATION = 0;
-    
+    private Context context;
+
     // Pico instance holder
     private Pico _pico;
 
@@ -38,6 +39,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        context = this.cordova.getActivity().getApplicationContext();
      
         if(action.equals("init")) {
             this.initialize(callbackContext);
@@ -71,7 +73,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      */
     private void initialize(CallbackContext callback) {
         // set callback for Pico connector
-        Context context = this.cordova.getActivity().getApplicationContext();
         PicoConnector.getInstance(context).setListener(context);
         callback.success("pico initialized");
     }
