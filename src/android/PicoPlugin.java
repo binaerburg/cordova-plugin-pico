@@ -76,7 +76,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * initializes the pico handlers
      */
     private void initialize(CallbackContext callback) {
-        log("Initializing plugin")
+        log("Initializing plugin");
         // set callback for Pico connector
         PicoConnector.getInstance(context).setListener((PicoConnectorListener)context);
         callback.success("pico initialized");
@@ -86,7 +86,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * destroys the pico session and disconnects it
      */
     private void destroy(CallbackContext callback) {
-        log("Destroying plugin")
+        log("Destroying plugin");
         super.onDestroy();
 
         if (_pico != null)
@@ -127,7 +127,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * scan a color
      */
     public void onScanClick(CallbackContext callbackContext) {
-        log("Scan clicked")
+        log("Scan clicked");
         if (_pico != null)
             _curScanCallbackContext = callbackContext;
             _pico.sendLabDataRequest();
@@ -137,7 +137,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * calibrate the pico sensor
      */
     public void onCalibrateClick(CallbackContext callbackContext) {
-        log("Calibration clicked")
+        log("Calibration clicked");
         if (_pico != null)
             _curCalibrateCallbackContext = callbackContext;
             _pico.sendCalibrationRequest();
@@ -147,7 +147,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * request a connection to pico
      */
     public void onConnectClick(CallbackContext callbackContext) {
-        log("Connect clicked")
+        log("Connect clicked");
         // Bluetooth in Android 6+ requires location permission to function
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
@@ -162,7 +162,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * disconnect the pico sensor
      */
     public void onDisconnectClick(CallbackContext callbackContext) {
-        log("Disconnect clicked")
+        log("Disconnect clicked");
         if (_pico != null) {
             _curDisconnectCallbackContext = callbackContext;
             _pico.disconnect();
