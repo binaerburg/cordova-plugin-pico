@@ -28,6 +28,7 @@ import com.palette.picoio.utils.Permissions;
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener{
 
     private static final int REQUEST_PERMISSION_LOCATION = 0;
+    private Activity activity;
     private Context context;
 
     // Pico instance holder
@@ -41,7 +42,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        context = this.cordova.getActivity().getApplicationContext();
+        activity = this.cordova.getActivity();
+        context = activity.getApplicationContext();
      
         if(action.equals("init")) {
             this.initialize(callbackContext);
@@ -144,10 +146,11 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // Bluetooth in Android 6+ requires location permission to function
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
-        if (!Permissions.hasLocationPermission((Activity)context))
-            Permissions.requestLocationPermission((Activity)context, REQUEST_PERMISSION_LOCATION);
-        else
+        if (!Permissions.hasLocationPermission(activity)) {
+            Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
+        } else {
             PicoConnector.getInstance(context).connect();
+        }
     }
 
     /**
