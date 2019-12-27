@@ -111,7 +111,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * Helper function for displaying event messages to the screen.
      */
     private void log(String text) {
-        Log.d(text);
+        Log.i("PicoPlugin", text);
     }
 
     /**
