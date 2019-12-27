@@ -100,7 +100,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         {
             case REQUEST_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    Context context = this.cordova.getActivity().getApplicationContext();
                     PicoConnector.getInstance(context).connect();
                 break;
         }
@@ -143,7 +142,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // Bluetooth in Android 6+ requires location permission to function
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
-        Context context = this.cordova.getActivity().getApplicationContext();
         if (!Permissions.hasLocationPermission(context))
             Permissions.requestLocationPermission(context, REQUEST_PERMISSION_LOCATION);
         else
@@ -171,7 +169,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Pico connected");
 
         // Upon connecting, set the listener for Pico specific callbacks.
-        Context context = this.cordova.getActivity().getApplicationContext();
         _pico = pico;
         _pico.setListener(context);
 
