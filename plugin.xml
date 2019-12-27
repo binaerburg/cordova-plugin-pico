@@ -22,7 +22,7 @@
         <framework src="src/android/Pico.gradle" custom="true" type="gradleReference"/>
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="Pico">
-                <param name="android-package" value="cordova.plugin.pico.Pico"/>
+                <param name="android-package" value="cordova.plugin.pico.PicoPlugin"/>
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
