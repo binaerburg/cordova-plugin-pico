@@ -67,6 +67,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private void initialize(CallbackContext callback) {
         // set callback for Pico connector
         PicoConnector.getInstance(this).setListener(this);
+        callback.success("pico initialized");
     }
 
     /**
@@ -77,9 +78,11 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         if (_pico != null)
         {
+            _curDisconnectCallbackContext = callback;
             _pico.disconnect();
             _pico = null;
         }
+        callback.success("pico context destroyed");
     }
 
     private void connect(JSONArray args, CallbackContext callback) {
