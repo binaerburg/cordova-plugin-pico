@@ -39,7 +39,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         }
 
         if(action.equals("destroy")) {
-            this.destroy(callbackContext)
+            this.destroy(callbackContext);
         }
         
         if(action.equals("connect")) {
