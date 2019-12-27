@@ -26,7 +26,7 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/Pico.java" target-dir="src/cordova/plugin/pico/Pico"/>
+        <source-file src="src/android/PicoPlugin.java" target-dir="src/cordova/plugin/pico/Pico"/>
         <lib-file src="src/android/PicoIO.aar"/>
 
 

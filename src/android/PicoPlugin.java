@@ -3,6 +3,9 @@ package cordova.plugin.pico;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import android.content.pm.PackageManager;
+import android.content.Context;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +69,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      */
     private void initialize(CallbackContext callback) {
         // set callback for Pico connector
-        PicoConnector.getInstance(this).setListener(this);
+        Context context = this.cordova.getActivity().getApplicationContext();
+        PicoConnector.getInstance(context).setListener(context);
         callback.success("pico initialized");
     }
 
@@ -85,20 +89,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         callback.success("pico context destroyed");
     }
 
-    private void connect(JSONArray args, CallbackContext callback) {
-        if(args != null){
-            try{
-                //TODO connect to Pico
-
-                callback.success("Success connected");
-            }catch(Exception exception){
-                callback.error("Something went wrong " + exception);
-            }
-        }else{
-            callback.error("Empty args");
-        }
-    }
-
     /**
      * Only relevant in Android 6+ where we must handle requesting location permissions.
      */
@@ -107,7 +97,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         {
             case REQUEST_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    PicoConnector.getInstance(this).connect();
+                    Context context = this.cordova.getActivity().getApplicationContext();
+                    PicoConnector.getInstance(context).connect();
                 break;
         }
     }
@@ -116,14 +107,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * Helper function for displaying event messages to the screen.
      */
     private void log(String text) {
-        _lblLog.append(text + "\n");
-        _scroll.post(new Runnable()
-        {
-            public void run()
-            {
-                _scroll.fullScroll(View.FOCUS_DOWN);
-            }
-        });
+        System.out.println(text);
     }
 
     /**
@@ -156,10 +140,11 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // Bluetooth in Android 6+ requires location permission to function
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
-        if (!Permissions.hasLocationPermission(this))
-            Permissions.requestLocationPermission(this, REQUEST_PERMISSION_LOCATION);
+        Context context = this.cordova.getActivity().getApplicationContext();
+        if (!Permissions.hasLocationPermission(context))
+            Permissions.requestLocationPermission(context, REQUEST_PERMISSION_LOCATION);
         else
-            PicoConnector.getInstance(this).connect();
+            PicoConnector.getInstance(context).connect();
     }
 
     /**
@@ -183,8 +168,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Pico connected");
 
         // Upon connecting, set the listener for Pico specific callbacks.
+        Context context = this.cordova.getActivity().getApplicationContext();
         _pico = pico;
-        _pico.setListener(this);
+        _pico.setListener(context);
 
         _pico.sendBatteryLevelRequest();
         _pico.sendBatteryStatusRequest();
