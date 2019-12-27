@@ -25,6 +25,8 @@ import com.palette.picoio.utils.Permissions;
 
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener{
 
+    private static final int REQUEST_PERMISSION_LOCATION = 0;
+    
     // Pico instance holder
     private Pico _pico;
 
