@@ -3,8 +3,10 @@ package cordova.plugin.pico;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
 
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,7 +75,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      */
     private void initialize(CallbackContext callback) {
         // set callback for Pico connector
-        PicoConnector.getInstance(context).setListener(context);
+        PicoConnector.getInstance(context).setListener((PicoConnectorListener)context);
         callback.success("pico initialized");
     }
 
@@ -109,7 +111,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * Helper function for displaying event messages to the screen.
      */
     private void log(String text) {
-        System.out.println(text);
+        Log.d(text);
     }
 
     /**
@@ -142,8 +144,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // Bluetooth in Android 6+ requires location permission to function
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
-        if (!Permissions.hasLocationPermission(context))
-            Permissions.requestLocationPermission(context, REQUEST_PERMISSION_LOCATION);
+        if (!Permissions.hasLocationPermission((Activity)context))
+            Permissions.requestLocationPermission((Activity)context, REQUEST_PERMISSION_LOCATION);
         else
             PicoConnector.getInstance(context).connect();
     }
@@ -170,7 +172,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // Upon connecting, set the listener for Pico specific callbacks.
         _pico = pico;
-        _pico.setListener(context);
+        _pico.setListener((PicoListener)context);
 
         _pico.sendBatteryLevelRequest();
         _pico.sendBatteryStatusRequest();
