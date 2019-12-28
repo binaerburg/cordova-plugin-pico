@@ -64,7 +64,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Parent App Context: " + context.toString());
         log("Web View: " + PicoPlugin.webView.toString());
 
-        PicoConnector.getInstance(context).setListener((PicoConnectorListener)this);
+        PicoConnector.getInstance(activity).setListener((PicoConnectorListener)this);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         switch (requestCode) {
             case REQUEST_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    PicoConnector.getInstance(context).connect();
+                    PicoConnector.getInstance(activity).connect();
                 break;
         }
     }
@@ -171,7 +171,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
             //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_LOCATION);
             // Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
         } else {
-            PicoConnector.getInstance(context).connect();
+            PicoConnector.getInstance(activity).connect();
             // TODO: Timer implementieren, der den connect Vorgang unterbricht -- oder manueller Abbruch
             // PicoConnector.getInstance(context).cancelConnect();
         }
@@ -194,7 +194,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * ---------------------------------------------------------------------------------------------
      */
 
-    //@Override
+    @Override
     public void onConnectSuccess(Pico paramPico) {
         log("Pico connected");
 
@@ -205,11 +205,12 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         _pico.sendBatteryLevelRequest();
         _pico.sendBatteryStatusRequest();
 
+        log(_curConnectCallbackContext.toString());
         if (_curConnectCallbackContext != null) {
             _curConnectCallbackContext.success("Pico connected");
         }
     }
-    //@Override
+    @Override
     public void onConnectFail(PicoError paramPicoError) {
         log("Failed to connect to Pico: " + paramPicoError.name());
         if (_curConnectCallbackContext != null) {
