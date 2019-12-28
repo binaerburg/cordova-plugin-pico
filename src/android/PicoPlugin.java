@@ -25,7 +25,7 @@ import com.palette.picoio.hardware.PicoConnector;
 import com.palette.picoio.utils.Permissions;
 
 
-public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener{
+public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
 
     private static final int REQUEST_PERMISSION_LOCATION = 0;
     private Activity activity;
@@ -44,6 +44,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         activity = this.cordova.getActivity();
         context = activity.getApplicationContext();
+        log("App Activity: " + activity.toString());
+        log("App Context: " + context.toString());
      
         if(action.equals("init")) {
             this.initialize(callbackContext);
@@ -151,11 +153,15 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // Bluetooth in Android 6+ requires location permission to function
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
+
+        // TODO: schauen, dass permission da ist und immer connecten... -- Handler einbauen
         if (!Permissions.hasLocationPermission(activity)) {
             Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
-        } else {
-            PicoConnector.getInstance(context).connect();
-        }
+        } 
+
+        PicoConnector.getInstance(context).connect();
+        // TODO: Timer implementieren, der den connect Vorgang unterbricht -- oder manueller Abbruch
+        // PicoConnector.getInstance(context).cancelConnect();
     }
 
     /**
@@ -175,7 +181,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * ---------------------------------------------------------------------------------------------
      */
 
-    @Override
+    // @Override
     public void onConnectSuccess(Pico pico) {
         log("Pico connected");
 
