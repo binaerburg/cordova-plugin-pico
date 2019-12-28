@@ -1,12 +1,19 @@
 package cordova.plugin.pico;
 
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.util.Log;
+
+// TODO: Durch androidx ersetzen?
+// import android.support.v4.app.ActivityCompat;
+// import android.support.v4.content.ContextCompat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,30 +38,43 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private Activity activity;
     private Context context;
 
+    // Reference to the web view for static access
+    private static CordovaWebView webView = null;
+
     // Pico instance holder
     private Pico _pico;
 
     // current callback contexts -- Used to send data back to app
-    private CallbackContext _curConnectCallbackContext;
-    private CallbackContext _curDisconnectCallbackContext;
-    private CallbackContext _curScanCallbackContext;
-    private CallbackContext _curCalibrateCallbackContext;
+    private CallbackContext _curConnectCallbackContext = null;
+    private CallbackContext _curDisconnectCallbackContext = null;
+    private CallbackContext _curScanCallbackContext = null;
+    private CallbackContext _curCalibrateCallbackContext = null;
+
+    @Override
+    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        super.initialize(cordova, webView);
+
+        PicoPlugin.webView = webView;
+        activity = this.cordova.getActivity();
+        context = activity.getApplicationContext();
+        log("Plugin Activity: " + this.toString());
+        log("Cordova Activity: " + this.cordova.toString());
+        log("Parent App Activity: " + activity.toString());
+        log("Parent App Context: " + context.toString());
+        log("Web View: " + PicoPlugin.webView.toString());
+
+        PicoConnector.getInstance(context).setListener((PicoConnectorListener)context);
+    }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        activity = this.cordova.getActivity();
-        context = activity.getApplicationContext();
-        log("App Activity: " + activity.toString());
-        log("App Context: " + context.toString());
-     
-        if(action.equals("init")) {
-            this.initialize(callbackContext);
-        }
+
+        log("execute called...");
 
         if(action.equals("destroy")) {
             this.destroy(callbackContext);
         }
-        
+
         if(action.equals("connect")) {
             this.onConnectClick(callbackContext);
         }
@@ -62,7 +82,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if(action.equals("disconnect")) {
             this.onDisconnectClick(callbackContext);
         }
-        
+
         if(action.equals("scan")) {
             this.onScanClick(callbackContext);
         }
@@ -72,16 +92,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         }
 
         return false;
-    }
-
-    /**
-     * initializes the pico handlers
-     */
-    private void initialize(CallbackContext callback) {
-        log("Initializing plugin");
-        // set callback for Pico connector
-        PicoConnector.getInstance(context).setListener((PicoConnectorListener)context);
-        callback.success("pico initialized");
     }
 
     /**
@@ -103,9 +113,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     /**
      * Only relevant in Android 6+ where we must handle requesting location permissions.
      */
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode)
-        {
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+        log("On Request Permission Result");
+        switch (requestCode) {
             case REQUEST_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     PicoConnector.getInstance(context).connect();
@@ -132,7 +142,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Scan clicked");
         if (_pico != null)
             _curScanCallbackContext = callbackContext;
-            _pico.sendLabDataRequest();
+        _pico.sendLabDataRequest();
     }
 
     /**
@@ -142,7 +152,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Calibration clicked");
         if (_pico != null)
             _curCalibrateCallbackContext = callbackContext;
-            _pico.sendCalibrationRequest();
+        _pico.sendCalibrationRequest();
     }
 
     /**
@@ -155,13 +165,15 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         _curConnectCallbackContext = callbackContext;
 
         // TODO: schauen, dass permission da ist und immer connecten... -- Handler einbauen
-        if (!Permissions.hasLocationPermission(activity)) {
-            Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
-        } 
-
-        PicoConnector.getInstance(context).connect();
-        // TODO: Timer implementieren, der den connect Vorgang unterbricht -- oder manueller Abbruch
-        // PicoConnector.getInstance(context).cancelConnect();
+        if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
+            //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+            // Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
+        } else {
+            PicoConnector.getInstance(context).connect();
+            // TODO: Timer implementieren, der den connect Vorgang unterbricht -- oder manueller Abbruch
+            // PicoConnector.getInstance(context).cancelConnect();
+        }
     }
 
     /**
@@ -181,26 +193,26 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * ---------------------------------------------------------------------------------------------
      */
 
-    // @Override
-    public void onConnectSuccess(Pico pico) {
+    //@Override
+    public void onConnectSuccess(Pico paramPico) {
         log("Pico connected");
 
         // Upon connecting, set the listener for Pico specific callbacks.
-        _pico = pico;
-        _pico.setListener((PicoListener)context);
+        _pico = paramPico;
+        _pico.setListener((PicoListener)this);
 
         _pico.sendBatteryLevelRequest();
         _pico.sendBatteryStatusRequest();
-        
+
         if (_curConnectCallbackContext != null) {
             _curConnectCallbackContext.success("Pico connected");
         }
     }
-    @Override
-    public void onConnectFail(PicoError e) {
-        log("Failed to connect to Pico: " + e.name());
+    //@Override
+    public void onConnectFail(PicoError paramPicoError) {
+        log("Failed to connect to Pico: " + paramPicoError.name());
         if (_curConnectCallbackContext != null) {
-            _curConnectCallbackContext.error("Failed to connect to Pico: " + e.name());
+            _curConnectCallbackContext.error("Failed to connect to Pico: " + paramPicoError.name());
         }
     }
 
@@ -218,26 +230,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if (_curScanCallbackContext != null) {
             _curScanCallbackContext.success(lab.toString());
         }
-        /*
-        // Convert lab to rgb and display it.
-        _viewScan.setBackgroundColor(lab.getColor());
-
-        // Find matches and display them.
-        List<Match> matches = SwatchMatcher.getMatches(lab, ExampleColorDbProvider.getSampleColors(), 3);
-
-        for (int i = 0; i < matches.size(); i++)
-        {
-            Match match = matches.get(i);
-
-            ViewGroup viewMatch = (ViewGroup)_layScan.getChildAt(i + 1);
-            TextView lblName = (TextView)viewMatch.getChildAt(1);
-            TextView lblDE = (TextView)viewMatch.getChildAt(2);
-
-            viewMatch.setBackgroundColor(match.getSwatch().getLab().getColor());
-            lblName.setText(match.getSwatch().getName());
-            lblDE.setText(String.format("dE %.2f", match.getDistance()));
-        }
-        */
     }
 
     public void onFetchSensorData(Pico pico, SensorData sensorData) {
