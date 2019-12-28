@@ -35,8 +35,8 @@ import com.palette.picoio.utils.Permissions;
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
 
     private static final int REQUEST_PERMISSION_LOCATION = 0;
-    private Activity activity;
-    private Context context;
+    private Activity activity = null;
+    private static Context context = null;
 
     // Reference to the web view for static access
     private static CordovaWebView webView = null;
@@ -51,19 +51,20 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private CallbackContext _curCalibrateCallbackContext = null;
 
     @Override
-    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-        super.initialize(cordova, webView);
+    public void initialize(CordovaInterface cordovaInterface, CordovaWebView webView) {
+        super.initialize(cordovaInterface, webView);
 
         PicoPlugin.webView = webView;
         activity = this.cordova.getActivity();
         context = activity.getApplicationContext();
+        log("Plugin this: " + PicoPlugin.this.toString());
         log("Plugin Activity: " + this.toString());
         log("Cordova Activity: " + this.cordova.toString());
         log("Parent App Activity: " + activity.toString());
         log("Parent App Context: " + context.toString());
         log("Web View: " + PicoPlugin.webView.toString());
 
-        PicoConnector.getInstance(context).setListener((PicoConnectorListener)context);
+        PicoConnector.getInstance(context).setListener((PicoConnectorListener)this);
     }
 
     @Override
