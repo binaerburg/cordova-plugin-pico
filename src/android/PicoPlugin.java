@@ -10,6 +10,9 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.Context;
 import android.util.Log;
+import android.os.Bundle;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
 // TODO: Durch androidx ersetzen?
 // import android.support.v4.app.ActivityCompat;
@@ -50,6 +53,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private CallbackContext _curScanCallbackContext = null;
     private CallbackContext _curCalibrateCallbackContext = null;
 
+    // Message Broadcaster
+    private final Intent labIntent = new Intent("labScan");
+
     @Override
     public void initialize(CordovaInterface cordovaInterface, CordovaWebView webView) {
         super.initialize(cordovaInterface, webView);
@@ -57,7 +63,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         PicoPlugin.webView = webView;
         activity = this.cordova.getActivity();
         context = activity.getApplicationContext();
-        log("Plugin this: " + PicoPlugin.this.toString());
         log("Plugin Activity: " + this.toString());
         log("Cordova Activity: " + this.cordova.toString());
         log("Parent App Activity: " + activity.toString());
@@ -65,12 +70,13 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Web View: " + PicoPlugin.webView.toString());
 
         PicoConnector.getInstance(activity).setListener((PicoConnectorListener)this);
+        log("Plugin initialized successfully!");
     }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 
-        log("execute called...");
+        log("execute called with action [" + action + "], args [" + args.toString() + "], callbackContext [" + callbackContext.toString() + "]");
 
         if(action.equals("destroy")) {
             this.destroy(callbackContext);
@@ -232,6 +238,12 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if (_curScanCallbackContext != null) {
             _curScanCallbackContext.success(lab.toString());
         }
+
+        // broadcast lab
+        final Bundle labBundle = new Bundle();
+        labBundle.putString( "lab", lab.toString());
+        labIntent.putExtras(labBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
     }
 
     public void onFetchSensorData(Pico pico, SensorData sensorData) {
