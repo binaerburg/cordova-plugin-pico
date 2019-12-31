@@ -48,13 +48,20 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private Pico _pico;
 
     // current callback contexts -- Used to send data back to app
+    // These are currently not used -> we use Intents to broadcast messages!
     private CallbackContext _curConnectCallbackContext = null;
     private CallbackContext _curDisconnectCallbackContext = null;
     private CallbackContext _curScanCallbackContext = null;
     private CallbackContext _curCalibrateCallbackContext = null;
 
     // Message Broadcaster
+    private final Intent errorIntent = new Intent("error");
+    private final Intent connectionIntent = new Intent("connection");
+    private final Intent calibrationIntent = new Intent("calibration");
     private final Intent labIntent = new Intent("labScan");
+    private final Intent sensorDataIntent = new Intent("sensorData");
+    private final Intent batteryLevelIntent = new Intent("batteryLevel");
+    private final Intent batteryStatusIntent = new Intent("batteryStatus");
 
     @Override
     public void initialize(CordovaInterface cordovaInterface, CordovaWebView webView) {
@@ -208,20 +215,35 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         _pico = paramPico;
         _pico.setListener((PicoListener)this);
 
-        _pico.sendBatteryLevelRequest();
-        _pico.sendBatteryStatusRequest();
+        boolean supportedBatteryLevelReq = _pico.sendBatteryLevelRequest();
+        boolean supportedBatteryStatusReq = _pico.sendBatteryStatusRequest();
+        _pico.sendSensorDataRequest();
 
+        log("Battery Level Request Supported: " + supportedBatteryLevelReq + ", Battery Level Request Supported: " + supportedBatteryStatusReq);
         log(_curConnectCallbackContext.toString());
         if (_curConnectCallbackContext != null) {
             _curConnectCallbackContext.success("Pico connected");
         }
+        
+        // broadcast connect
+        final Bundle connectionBundle = new Bundle();
+        connectionBundle.putBoolean("connection", true);
+        connectionIntent.putExtras(connectionBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(connectionIntent);
     }
+
     @Override
     public void onConnectFail(PicoError paramPicoError) {
         log("Failed to connect to Pico: " + paramPicoError.name());
         if (_curConnectCallbackContext != null) {
             _curConnectCallbackContext.error("Failed to connect to Pico: " + paramPicoError.name());
         }
+
+        // broadcast connection failed [error]
+        final Bundle connectionErrorBundle = new Bundle();
+        connectionErrorBundle.putString("ConnectionError", "Failed to connect to Pico: " + paramPicoError.name());
+        errorIntent.putExtras(connectionErrorBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
     }
 
     @Override
@@ -230,6 +252,12 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if(_curDisconnectCallbackContext != null) {
             _curDisconnectCallbackContext.success("Pico disconnected");
         }
+
+        // broadcast disconnect
+        final Bundle connectionBundle = new Bundle();
+        connectionBundle.putBoolean("connection", false);
+        connectionIntent.putExtras(connectionBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(connectionIntent);
     }
 
     @Override
@@ -241,13 +269,20 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // broadcast lab
         final Bundle labBundle = new Bundle();
-        labBundle.putString( "lab", lab.toString());
+        labBundle.putString("lab", lab.toString());
         labIntent.putExtras(labBundle);
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
     }
 
+    @Override
     public void onFetchSensorData(Pico pico, SensorData sensorData) {
         log(sensorData.toString());
+
+        // broadcast sensor data
+        final Bundle sensorDataBundle = new Bundle();
+        sensorDataBundle.putString("sensorData", sensorData.toString());
+        sensorDataIntent.putExtras(sensorDataBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(sensorDataIntent);
     }
 
     @Override
@@ -256,14 +291,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if (_curCalibrateCallbackContext != null) {
             _curCalibrateCallbackContext.success("Calibration complete: " + result.name());
         }
+
+        // broadcast calibration result
+        final Bundle calibrationBundle = new Bundle();
+        calibrationBundle.putString("sensorData", result.name());
+        calibrationIntent.putExtras(calibrationBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(calibrationIntent);
     }
 
     @Override
     public void onFetchBatteryLevel(Pico pico, int level) {
         log("Battery level: " + level);
+
+        // broadcast battery level
+        final Bundle batteryLevelBundle = new Bundle();
+        batteryLevelBundle.putInt("batteryLevel", level);
+        batteryLevelIntent.putExtras(batteryLevelBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(batteryLevelIntent);
     }
     @Override
     public final void onFetchBatteryStatus(Pico pico, Pico.BatteryStatus status) {
         log("Battery status: " + status);
+
+        // broadcast battery status
+        final Bundle batteryStatusBundle = new Bundle();
+        batteryStatusBundle.putString("batteryStatus", status.toString());
+        batteryStatusIntent.putExtras(batteryStatusBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(batteryStatusIntent);
     }
 }
