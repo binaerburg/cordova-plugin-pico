@@ -156,6 +156,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Scan clicked");
         if (_pico != null)
             _curScanCallbackContext = callbackContext;
+
+        // lab values with led support
         _pico.sendLabDataRequest();
     }
 
@@ -217,7 +219,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         boolean supportedBatteryLevelReq = _pico.sendBatteryLevelRequest();
         boolean supportedBatteryStatusReq = _pico.sendBatteryStatusRequest();
-        _pico.sendSensorDataRequest();
 
         log("Battery Level Request Supported: " + supportedBatteryLevelReq + ", Battery Level Request Supported: " + supportedBatteryStatusReq);
         log(_curConnectCallbackContext.toString());
@@ -266,6 +267,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if (_curScanCallbackContext != null) {
             _curScanCallbackContext.success(lab.toString());
         }
+
+        // additionally get raw sensor data without firing leds
+        _pico.sendSensorDataRequest();
 
         // broadcast lab
         final Bundle labBundle = new Bundle();
