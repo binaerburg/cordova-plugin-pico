@@ -193,10 +193,11 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
             new Timer().schedule(new TimerTask() {          
                 @Override
                 public void run() {
+                    log("Connection Timeout");
                     PicoConnector.getInstance(activity).cancelConnect();
                     // broadcast connection failed [error]
                     final Bundle connectionErrorBundle = new Bundle();
-                    connectionErrorBundle.putString("ConnectionError", "Failed to connect to Pico: " + paramPicoError.name());
+                    connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
                     errorIntent.putExtras(connectionErrorBundle);
                     LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
                 }
@@ -254,7 +255,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // broadcast connection failed [error]
         final Bundle connectionErrorBundle = new Bundle();
-        connectionErrorBundle.putString("ConnectionError", "Failed to connect to Pico: " + paramPicoError.name());
+        connectionErrorBundle.putString("error", "Failed to connect to Pico: " + paramPicoError.name());
         errorIntent.putExtras(connectionErrorBundle);
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
     }
