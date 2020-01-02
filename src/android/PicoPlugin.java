@@ -166,6 +166,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         if (_pico != null) {
             final Bundle singleInfos = new Bundle();
+            log ("Pico Name: " + _pico.getName());
+            log ("Pico Serial: " + _pico.getSerial());
+            log ("Pico BL address: " + _pico.getBluetoothAddress());
             singleInfos.putString("name", _pico.getName());
             singleInfos.putString("serial", _pico.getSerial());
             singleInfos.putString("bluetoothAddress", _pico.getBluetoothAddress());
