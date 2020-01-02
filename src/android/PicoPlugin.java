@@ -5,6 +5,9 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
@@ -187,8 +190,17 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
             // Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
         } else {
             PicoConnector.getInstance(activity).connect();
-            // TODO: Timer implementieren, der den connect Vorgang unterbricht -- oder manueller Abbruch
-            // PicoConnector.getInstance(context).cancelConnect();
+            new Timer().schedule(new TimerTask() {          
+                @Override
+                public void run() {
+                    PicoConnector.getInstance(activity).cancelConnect();
+                    // broadcast connection failed [error]
+                    final Bundle connectionErrorBundle = new Bundle();
+                    connectionErrorBundle.putString("ConnectionError", "Failed to connect to Pico: " + paramPicoError.name());
+                    errorIntent.putExtras(connectionErrorBundle);
+                    LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+                }
+            }, 5000);
         }
     }
 
@@ -298,7 +310,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // broadcast calibration result
         final Bundle calibrationBundle = new Bundle();
-        calibrationBundle.putString("sensorData", result.name());
+        calibrationBundle.putString("calibrationResult", result.name());
         calibrationIntent.putExtras(calibrationBundle);
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(calibrationIntent);
     }
