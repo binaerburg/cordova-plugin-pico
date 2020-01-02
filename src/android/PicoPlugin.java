@@ -100,10 +100,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if(action.equals("disconnect")) {
             this.onDisconnectClick(callbackContext);
         }
-        
-        if(action.equals("info")) {
-            this.onPicoInfoClick(callbackContext);
-        }
 
         if(action.equals("scan")) {
             this.onScanClick(callbackContext);
@@ -308,18 +304,26 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // broadcast lab
         final Bundle labBundle = new Bundle();
-        labBundle.putString("lab", lab.toString());
+        final Bundle singleLABParts = new Bundle();
+        singleLABParts.putFloat("l", lab.l);
+        singleLABParts.putFloat("a", lab.a);
+        singleLABParts.putFloat("b", lab.b);
+        labBundle.putBundle("lab", singleLABParts);
         labIntent.putExtras(labBundle);
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
     }
 
     @Override
     public void onFetchSensorData(Pico pico, SensorData sensorData) {
-        log(sensorData.toString());
+        log("Received Sensor Data: " + sensorData.toString());
 
         // broadcast sensor data
         final Bundle sensorDataBundle = new Bundle();
-        sensorDataBundle.putString("sensorData", sensorData.toString());
+        final Bundle singleSensorDataParts = new Bundle();
+        singleSensorDataParts.putInt("r", sensorData.r);
+        singleSensorDataParts.putInt("g", sensorData.g);
+        singleSensorDataParts.putInt("b", sensorData.b);
+        sensorDataBundle.putBundle("sensorData", singleSensorDataParts);
         sensorDataIntent.putExtras(sensorDataBundle);
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(sensorDataIntent);
     }
