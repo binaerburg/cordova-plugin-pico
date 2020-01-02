@@ -273,7 +273,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(connectionIntent);
 
         // trigger pico info
-        onPicoInfoClick();
+        onPicoInfoClick(null);
     }
 
     @Override
