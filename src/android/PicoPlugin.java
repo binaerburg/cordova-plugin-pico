@@ -65,6 +65,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private final Intent sensorDataIntent = new Intent("sensorData");
     private final Intent batteryLevelIntent = new Intent("batteryLevel");
     private final Intent batteryStatusIntent = new Intent("batteryStatus");
+    private final Intent picoInfoIntent = new Intent("picoInfo");
 
     @Override
     public void initialize(CordovaInterface cordovaInterface, CordovaWebView webView) {
@@ -98,6 +99,10 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         if(action.equals("disconnect")) {
             this.onDisconnectClick(callbackContext);
+        }
+        
+        if(action.equals("info")) {
+            this.onPicoInfoClick(callbackContext);
         }
 
         if(action.equals("scan")) {
@@ -153,6 +158,27 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      */
 
     /**
+     * get the pico sensor info - name, serial, BT address
+     */
+    public void onPicoInfoClick(CallbackContext callbackContext) {
+        // broadcast the sensor info
+        final Bundle picoInfoBundle = new Bundle();
+
+        if (_pico != null) {
+            final Bundle singleInfos = new Bundle();
+            singleInfos.putString("name", _pico.getName());
+            singleInfos.putString("serial", _pico.getSerial());
+            singleInfos.putString("bluetoothAddress", _pico.getBluetoothAddress());
+            picoInfoBundle.putBundle("info", singleInfos);
+        } else {
+            picoInfoBundle.putString("info", null);
+        }
+
+        picoInfoIntent.putExtras(picoInfoBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(picoInfoIntent);
+    }
+
+    /**
      * scan a color
      */
     public void onScanClick(CallbackContext callbackContext) {
@@ -183,23 +209,22 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
 
-        // TODO: schauen, dass permission da ist und immer connecten... -- Handler einbauen
         if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
             cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
-            //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_LOCATION);
-            // Permissions.requestLocationPermission(activity, REQUEST_PERMISSION_LOCATION);
         } else {
             PicoConnector.getInstance(activity).connect();
             new Timer().schedule(new TimerTask() {          
                 @Override
                 public void run() {
-                    log("Connection Timeout");
-                    PicoConnector.getInstance(activity).cancelConnect();
-                    // broadcast connection failed [error]
-                    final Bundle connectionErrorBundle = new Bundle();
-                    connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
-                    errorIntent.putExtras(connectionErrorBundle);
-                    LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+                    if (_pico == null) {
+                        log("Connection Timeout");
+                        PicoConnector.getInstance(activity).cancelConnect();
+                        // broadcast connection failed [error]
+                        final Bundle connectionErrorBundle = new Bundle();
+                        connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
+                        errorIntent.putExtras(connectionErrorBundle);
+                        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+                    }
                 }
             }, 5000);
         }
@@ -234,7 +259,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         boolean supportedBatteryStatusReq = _pico.sendBatteryStatusRequest();
 
         log("Battery Level Request Supported: " + supportedBatteryLevelReq + ", Battery Level Request Supported: " + supportedBatteryStatusReq);
-        log(_curConnectCallbackContext.toString());
         if (_curConnectCallbackContext != null) {
             _curConnectCallbackContext.success("Pico connected");
         }
