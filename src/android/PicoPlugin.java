@@ -158,30 +158,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      */
 
     /**
-     * get the pico sensor info - name, serial, BT address
-     */
-    public void onPicoInfoClick(CallbackContext callbackContext) {
-        // broadcast the sensor info
-        final Bundle picoInfoBundle = new Bundle();
-
-        if (_pico != null) {
-            final Bundle singleInfos = new Bundle();
-            log ("Pico Name: " + _pico.getName());
-            log ("Pico Serial: " + _pico.getSerial());
-            log ("Pico BL address: " + _pico.getBluetoothAddress());
-            singleInfos.putString("name", _pico.getName());
-            singleInfos.putString("serial", _pico.getSerial());
-            singleInfos.putString("bluetoothAddress", _pico.getBluetoothAddress());
-            picoInfoBundle.putBundle("info", singleInfos);
-        } else {
-            picoInfoBundle.putString("info", null);
-        }
-
-        picoInfoIntent.putExtras(picoInfoBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(picoInfoIntent);
-    }
-
-    /**
      * scan a color
      */
     public void onScanClick(CallbackContext callbackContext) {
@@ -272,8 +248,24 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         connectionIntent.putExtras(connectionBundle);
         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(connectionIntent);
 
-        // trigger pico info
-        onPicoInfoClick(null);
+        // broadcast the sensor info
+        final Bundle picoInfoBundle = new Bundle();
+
+        if (_pico != null) {
+            final Bundle singleInfos = new Bundle();
+            log ("Pico Name: " + _pico.getName());
+            log ("Pico Serial: " + _pico.getSerial());
+            log ("Pico BL address: " + _pico.getBluetoothAddress());
+            singleInfos.putString("name", _pico.getName());
+            singleInfos.putString("serial", _pico.getSerial());
+            singleInfos.putString("bluetoothAddress", _pico.getBluetoothAddress());
+            picoInfoBundle.putBundle("info", singleInfos);
+        } else {
+            picoInfoBundle.putString("info", null);
+        }
+
+        picoInfoIntent.putExtras(picoInfoBundle);
+        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(picoInfoIntent);
     }
 
     @Override
