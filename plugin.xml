@@ -14,7 +14,24 @@
                 <param name="ios-package" value="PicoPlugin"/>
             </feature>
         </config-file>
+
+        <config-file target="*-Info.plist" parent="UIBackgroundModes"/>
+        <resource-file src="src/ios/PicoPluginConfig.plist" />
+
+
         <source-file src="src/ios/PicoPlugin.m"/>
+        <header-file src="src/ios/PicoPlugin.h"/>
+
+        <header-file src="src/ios/PicoSDK.h" />
+        <header-file src="src/ios/CUSwatchMatcher.h" />
+        <header-file src="src/ios/CUSwatch.h" />
+        <header-file src="src/ios/CUSensorData.h" />
+        <header-file src="src/ios/CUPicoConnector.h" />
+        <header-file src="src/ios/CUPico.h" />
+        <header-file src="src/ios/CUMatch.h" />
+        <header-file src="src/ios/CULAB.h" />
+        <source-file src="src/ios/libPicoSDK.a" framework="true" />
+
     </platform>
 
 

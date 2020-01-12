@@ -1,36 +1,25 @@
 /********* Pico.m Cordova Plugin Implementation *******/
 
-#import <Cordova/CDV.h>
+#import "PicoPlugin.h"
 
-@interface PicoPlugin() : CDVPlugin
-{
+/**@interface PicoPlugin : CDVPlugin{
     CUPicoConnector *_picoConnector;
     CUPico *_pico;
 }
-@end
-
-
-// - (void)connect;
-//- (void)destroy;
-//- (void)disconnect;
-//- (void)scan;
-//- (void)calibrate;
-//- (void)pluginInitialize:
-
-
+@end**/
 
 @implementation PicoPlugin
-- (void)pluginInitialize
+-(void)pluginInitialize
 {
-    [super viewDidLoad];
-    [self initViews];
+    NSLog(@"Pico pluginInitialize");
 
     _picoConnector = CUPicoConnector.alloc.init;
     _picoConnector.delegate = self;
 } 
 
-- (void)connect
+-(void)connect
 {
+    NSLog(@"Pico try to connect");
     [_picoConnector connect];
 }
 /**
@@ -67,8 +56,7 @@
 {
     _pico = pico;
 
-    [self log:@"Pico connected"];
-    //_lblPico.text = [NSString stringWithFormat:@"%@\n%@", _pico.name, _pico.serial];
+    NSLog(@"Pico conntected");
 
     _pico.delegate = self;
 
@@ -78,7 +66,8 @@
 
 - (void)onConnectFail:(NSError *)error
 {
-    [self log:[NSString stringWithFormat:@"Failed to connect to Pico: %@", error.description]];
+    //[self log:[NSString stringWithFormat:@"Failed to connect to Pico: %@", error.description]];
+    NSLog(@"Pico error");
 }
 
 
