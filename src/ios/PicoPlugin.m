@@ -1,56 +1,32 @@
 /********* Pico.m Cordova Plugin Implementation *******/
-
 #import "PicoPlugin.h"
 
-/**@interface PicoPlugin : CDVPlugin{
+
+@interface PicoPlugin ()
+{
     CUPicoConnector *_picoConnector;
     CUPico *_pico;
 }
-@end**/
+@end
 
 @implementation PicoPlugin
 -(void)pluginInitialize
 {
     NSLog(@"Pico pluginInitialize");
-
+    //[super viewDidLoad];
+    //[self initViews];
+    //self = [super pluginInitialize];
     _picoConnector = CUPicoConnector.alloc.init;
     _picoConnector.delegate = self;
-} 
+    NSLog(@"Pico pluginInitialize2");
+}
 
--(void)connect
+- (void)connect:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Pico try to connect");
     [_picoConnector connect];
+    NSLog(@"Pico behind connect");
 }
-/**
-- (void)destroy
-{
-
-}
-
-- (void)disconnect
-{
-    if (_pico != nil)
-    {
-        [_pico disconnect];
-        _pico = nil;
-    }
-}
-
-- (void)scan
-{
-    [_pico sendLabDataRequest];
-}
-
-- (void)calibrate
-{
-     [_pico sendCalibrationRequest];
-}
-
-
-/**
- * CUPicoManagerDelegate events.
- */
 
 - (void)onConnectSuccess:(CUPico *)pico
 {
@@ -66,19 +42,32 @@
 
 - (void)onConnectFail:(NSError *)error
 {
-    //[self log:[NSString stringWithFormat:@"Failed to connect to Pico: %@", error.description]];
-    NSLog(@"Pico error");
+    NSLog(@"Failed to connect to Pico: %@", error.description);
 }
 
 
-/**
- * CUPicoDelegate events.
- */
-/**
+- (void)disconnect
+{
+    if (_pico != nil)
+    {
+        [_pico disconnect];
+        _pico = nil;
+    }
+}
+/*
+- (void)scan
+{
+    [_pico sendLabDataRequest];
+}
+
+- (void)calibrate
+{
+     [_pico sendCalibrationRequest];
+}
+
 - (void)onDisconnect:(CUPico *)pico error:(NSError *)error
 {
-    [self log:@"Pico disconnected"];
-    _lblPico.text = @"Pico disconnected";
+    NSLog(@"Pico disconnected");
 }
 
 - (void)onFetchLabData:(CUPico *)pico lab:(CULAB *)lab

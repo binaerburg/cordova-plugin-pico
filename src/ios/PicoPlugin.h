@@ -3,9 +3,6 @@
 #import <Cordova/CDV.h>
 #import "PicoSDK.h"
 
-@interface PicoPlugin : CDVPlugin{
-    CUPicoConnector *_picoConnector;
-    CUPico *_pico;
-}
--(void)connect;
+@interface PicoPlugin : CDVPlugin <CUPicoConnectorDelegate, CUPicoDelegate>
+
 @end
