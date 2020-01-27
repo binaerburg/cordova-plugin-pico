@@ -16,9 +16,12 @@
     //[super viewDidLoad];
     //[self initViews];
     //self = [super pluginInitialize];
-    _picoConnector = CUPicoConnector.alloc.init;
-    _picoConnector.delegate = self;
-    NSLog(@"Pico pluginInitialize2");
+    //activity = this.cordova.getActivity();
+    //context = activity.getApplicationContext();
+
+          _picoConnector = CUPicoConnector.alloc.init;
+          _picoConnector.delegate = self;
+
 }
 
 - (void)connect:(CDVInvokedUrlCommand*)command
