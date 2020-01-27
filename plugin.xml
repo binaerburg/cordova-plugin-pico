@@ -30,7 +30,7 @@
         <header-file src="src/ios/CUPico.h" />
         <header-file src="src/ios/CUMatch.h" />
         <header-file src="src/ios/CULAB.h" />
-        <lib-file src="src/ios/libPicoSDK.a"/>
+        <source-file src="src/ios/libPicoSDK.a" framework="true"/>
 
     </platform>
 

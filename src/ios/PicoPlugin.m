@@ -19,8 +19,8 @@
     //activity = this.cordova.getActivity();
     //context = activity.getApplicationContext();
 
-          _picoConnector = CUPicoConnector.alloc.init;
-          _picoConnector.delegate = self;
+    _picoConnector = CUPicoConnector.alloc.init;
+    _picoConnector.delegate = self;
 
 }
 
