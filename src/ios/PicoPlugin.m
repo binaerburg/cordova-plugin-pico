@@ -1,26 +1,15 @@
 /********* Pico.m Cordova Plugin Implementation *******/
 #import "PicoPlugin.h"
-
-
-@interface PicoPlugin ()
-{
-    CUPicoConnector *_picoConnector;
-    CUPico *_pico;
-}
-@end
+#import <Cordova/CDV.h>
 
 @implementation PicoPlugin
--(void)pluginInitialize
+-(void)pluginInitialize:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Pico pluginInitialize");
-    //[super viewDidLoad];
-    //[self initViews];
-    //self = [super pluginInitialize];
-    //activity = this.cordova.getActivity();
-    //context = activity.getApplicationContext();
+    [super pluginInitialize];
 
-          _picoConnector = CUPicoConnector.alloc.init;
-          _picoConnector.delegate = self;
+    _picoConnector = CUPicoConnector.alloc.init;
+    _picoConnector.delegate = self;
 
 }
 
@@ -49,7 +38,7 @@
 }
 
 
-- (void)disconnect
+- (void)disconnect:(CDVInvokedUrlCommand *)command;
 {
     if (_pico != nil)
     {

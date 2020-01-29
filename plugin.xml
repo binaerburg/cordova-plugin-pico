@@ -11,7 +11,7 @@
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="PicoPlugin">
-                <param name="ios-package" value="PicoPlugin"/>
+                <param name="ios-package" value="PicoPlugin" onload="true"/>
             </feature>
         </config-file>
 
@@ -30,7 +30,18 @@
         <header-file src="src/ios/CUPico.h" />
         <header-file src="src/ios/CUMatch.h" />
         <header-file src="src/ios/CULAB.h" />
-        <lib-file src="src/ios/libPicoSDK.a"/>
+
+        <!-- framework -->
+        <source-file src="src/ios/libPicoSDK.a" framework="true"/>
+
+        <!-- iOS SPermissions -->
+       <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
+       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothPeripheralUsageDescription">
+           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+       </config-file>
+       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothAlwaysUsageDescription">
+           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+       </config-file>
 
     </platform>
 
