@@ -3,21 +3,16 @@
 #import <Cordova/CDV.h>
 
 @implementation PicoPlugin
--(void)pluginInitialize:(CDVInvokedUrlCommand*)command
-{
-    NSLog(@"Pico pluginInitialize");
-    [super pluginInitialize];
-
-    _picoConnector = CUPicoConnector.alloc.init;
-    _picoConnector.delegate = self;
-
-}
 
 - (void)connect:(CDVInvokedUrlCommand*)command
 {
-    NSLog(@"Pico try to connect");
-    [_picoConnector connect];
-    NSLog(@"Pico behind connect");
+   if (_picoConnector == nil)
+   {
+      _picoConnector = CUPicoConnector.alloc.init;
+      _picoConnector.delegate = self;
+   }
+
+  [_picoConnector connect];
 }
 
 - (void)onConnectSuccess:(CUPico *)pico
