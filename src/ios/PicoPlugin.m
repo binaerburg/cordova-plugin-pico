@@ -4,13 +4,24 @@
 
 @implementation PicoPlugin
 
-- (void)connect:(CDVInvokedUrlCommand*)command
+- (void)init:(CDVInvokedUrlCommand*)command
 {
-   if (_picoConnector == nil)
+    NSLog(@"Inititalize...");
+    if (_picoConnector == nil)
    {
       _picoConnector = CUPicoConnector.alloc.init;
       _picoConnector.delegate = self;
    }
+}
+
+
+- (void)connect:(CDVInvokedUrlCommand*)command
+{
+   /*if (_picoConnector == nil)
+   {
+      _picoConnector = CUPicoConnector.alloc.init;
+      _picoConnector.delegate = self;
+   }*/
 
   [_picoConnector connect];
 }
