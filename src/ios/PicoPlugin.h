@@ -14,5 +14,6 @@
 - (void) onConnectSuccess:(CUPico *)pico;
 - (void) onConnectFail:(NSError *)error;
 - (void) disconnect:(CDVInvokedUrlCommand *)command;
+- (void) triggerInititalize:(CDVInvokedUrlCommand *)command;
 
 @end

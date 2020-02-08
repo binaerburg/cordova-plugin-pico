@@ -23,3 +23,7 @@ module.exports.scan = function (arg0, success, error) {
 module.exports.calibrate = function (arg0, success, error) {
     exec(success,error,"PicoPlugin", "calibrate")
 };
+
+module.exports.triggerInititalize = function (arg0, success, error) {
+    exec(success,error,"PicoPlugin", "triggerInititalize")
+};

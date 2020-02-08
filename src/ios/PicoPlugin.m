@@ -15,13 +15,22 @@
 }
 
 
+- (void)triggerInititalize:(CDVInvokedUrlCommand*)command
+{
+    NSLog(@"Trigger Inititalize...");
+}
+
 - (void)connect:(CDVInvokedUrlCommand*)command
 {
-   /*if (_picoConnector == nil)
+   if (_picoConnector == nil)
    {
+      NSLog(@"connect: _picoConnector == nil");
       _picoConnector = CUPicoConnector.alloc.init;
       _picoConnector.delegate = self;
-   }*/
+      NSLog(@"start wait");
+      [NSThread sleepForTimeInterval:1.0f];
+      NSLog(@"lets go");
+   }
 
   [_picoConnector connect];
 }
