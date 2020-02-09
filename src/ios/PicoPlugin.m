@@ -51,27 +51,38 @@
 
 - (void)onConnectSuccess:(CUPico *)pico
 {
-    _pico = pico;
-
     NSLog(@"Pico conntected");
 
+    _pico = pico;
     _pico.delegate = self;
-
-    //NSDictionary *normalDict = [[NSDictionary alloc]initWithObjectsAndKeys:@"Value1",@"Key1",@"Value2",@"Key2",@"Value3",@"Key3",nil];
-
-     NSDictionary * payload = @{
-        @"connection": [NSNumber numberWithBool:YES]
-    };
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
 
     [_pico sendBatteryLevelRequest];
     [_pico sendBatteryStatusRequest];
+
+    NSDictionary * payload = @{
+            @"connection": [NSNumber numberWithBool:YES]
+        };
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
+
+
+   NSDictionary * payload = @{
+                      @"name": [NSString stringWithFormat:@"%@", _pico.name],
+                      @"serial": [NSString stringWithFormat:@"%@", _pico.serial],
+                      @"bluetoothAddress": @"unknown"
+                  };
+
+   [[NSNotificationCenter defaultCenter] postNotificationName:@"picoInfo" object:nil userInfo:payload];
+
+
 }
 
 - (void)onConnectFail:(NSError *)error
 {
-    NSLog(@"Failed to connect to Pico: %@", error.description);
+    NSDictionary * payload = @{
+            @"connection": [NSString stringWithFormat:@"Failed to connect to Pico: %@", error.description]
+        };
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
 }
 
 
@@ -94,6 +105,16 @@
      [_pico sendCalibrationRequest];
 }
 
+- (void)onCalibrationComplete:(CUPico *)pico success:(BOOL)success
+{
+   NSDictionary * payload = @{
+               @"calibrationResult":  success ? @"success" : @"failure"
+           };
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"calibration" object:nil userInfo:payload];
+
+}
+
 - (void)onDisconnect:(CUPico *)pico error:(NSError *)error
 {
      NSDictionary * payload = @{
@@ -113,16 +134,30 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"labScan" object:nil userInfo:payload];
 }
 
-/*
+
 - (void)onCalibrationComplete:(CUPico *)pico success:(BOOL)success
 {
     NSString *result = success ? @"success" : @"failure";
     [self log:[NSString stringWithFormat:@"Calibration complete: %@", result]];
+
+    NSDictionary * payload = @{
+                @"calibrationResult":  success ? @"success" : @"failure"
+            };
+
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"calibration" object:nil userInfo:payload];
+
 }
 
 - (void)onFetchBatteryLevel:(CUPico *)pico level:(NSInteger)level
 {
     [self log:[NSString stringWithFormat:@"Battery level: %d", level]];
+
+     NSDictionary * payload = @{
+             @"batteryLevel": [NSNumber numberWithInteger:level]
+         };
+
+     [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryLevel" object:nil userInfo:payload];
 }
 
 - (void)onFetchBatteryStatus:(CUPico *)pico status:(CUBatteryStatus)status
@@ -141,8 +176,12 @@
             break;
     }
 
-    [self log:[NSString stringWithFormat:@"Battery status: %@", str]];
+    NSDictionary * payload = @{
+            @"connection": [NSString stringWithFormat:@"Battery status: %@", str]
+        };
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryStatus" object:nil userInfo:payload];
 }
-*/
+
 
 @end

@@ -18,6 +18,7 @@
 - (void) disconnect:(CDVInvokedUrlCommand *)command;
 - (void) scan:(CDVInvokedUrlCommand *)command;
 - (void) calibrate:(CDVInvokedUrlCommand *)command;
+- (void) onCalibrationComplete:(CUPico *)pico success:(BOOL)success
 
 
 
