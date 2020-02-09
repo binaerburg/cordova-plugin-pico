@@ -14,10 +14,24 @@
    }
 }
 
+- (void) destroy:(CDVInvokedUrlCommand*)command {
+    if (_pico != nil)
+        {
+            [_pico disconnect];
+            _pico = nil;
+            [self triggerInititalize:command];
+        }
+    NSLog(@"destroyed");
+}
 
 - (void)triggerInititalize:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Trigger Inititalize...");
+    if (_picoConnector == nil)
+   {
+      _picoConnector = CUPicoConnector.alloc.init;
+      _picoConnector.delegate = self;
+   }
 }
 
 - (void)connect:(CDVInvokedUrlCommand*)command
@@ -43,6 +57,14 @@
 
     _pico.delegate = self;
 
+    //NSDictionary *normalDict = [[NSDictionary alloc]initWithObjectsAndKeys:@"Value1",@"Key1",@"Value2",@"Key2",@"Value3",@"Key3",nil];
+
+     NSDictionary * payload = @{
+        @"connection": [NSNumber numberWithBool:YES]
+    };
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
+
     [_pico sendBatteryLevelRequest];
     [_pico sendBatteryStatusRequest];
 }
@@ -61,17 +83,18 @@
         _pico = nil;
     }
 }
-/*
-- (void)scan
+
+- (void)scan:(CDVInvokedUrlCommand *)command
 {
     [_pico sendLabDataRequest];
 }
 
-- (void)calibrate
+- (void)calibrate:(CDVInvokedUrlCommand *)command
 {
      [_pico sendCalibrationRequest];
 }
 
+/*
 - (void)onDisconnect:(CUPico *)pico error:(NSError *)error
 {
     NSLog(@"Pico disconnected");

@@ -8,6 +8,10 @@ module.exports.destroy = function (arg0, success, error) {
     exec(success,error,"PicoPlugin", "destroy")
 };
 
+module.exports.triggerInititalize = function (arg0, success, error) {
+    exec(success,error,"PicoPlugin", "triggerInititalize")
+};
+
 module.exports.connect = function (arg0, success, error) {
     exec(success,error,"PicoPlugin", "connect")
 };
@@ -22,8 +26,4 @@ module.exports.scan = function (arg0, success, error) {
 
 module.exports.calibrate = function (arg0, success, error) {
     exec(success,error,"PicoPlugin", "calibrate")
-};
-
-module.exports.triggerInititalize = function (arg0, success, error) {
-    exec(success,error,"PicoPlugin", "triggerInititalize")
 };
