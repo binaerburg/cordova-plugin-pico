@@ -94,33 +94,26 @@
      [_pico sendCalibrationRequest];
 }
 
-/*
 - (void)onDisconnect:(CUPico *)pico error:(NSError *)error
 {
-    NSLog(@"Pico disconnected");
+     NSDictionary * payload = @{
+        @"connection": [NSNumber numberWithBool:NO]
+    };
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
 }
+
 
 - (void)onFetchLabData:(CUPico *)pico lab:(CULAB *)lab
 {
-    [self log:[NSString stringWithFormat:@"Received LAB: %@", lab.toString]];
-
-    // Convert lab to rgb and display it.
-    _lblScan.backgroundColor = lab.color;
-
-    // Find matches and display them.
-    NSArray *swatches = self.getSampleColors;
-    NSArray *matches = [CUSwatchMatcher getMatches:lab swatches:swatches numMatches:3];
-
-    for (NSInteger i = 0; i < matches.count; i++)
-    {
-        CUMatch *match = matches[i];
-
-        UILabel *lbl = _lblMatches[i];
-        lbl.backgroundColor = match.swatch.lab.color;
-        lbl.text = [NSString stringWithFormat:@"MATCH %d\n%@\ndE %.2f", i + 1, match.swatch.name, match.distance];
-    }
+    NSDictionary * payload = @{
+        @"lab": @{ @"l": [NSNumber numberWithFloat:(double) lab.l], @"a": [NSNumber numberWithFloat:(double) lab.a],  @"b": [NSNumber numberWithFloat:(double) lab.b]}
+    };
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"labScan" object:nil userInfo:payload];
 }
 
+/*
 - (void)onCalibrationComplete:(CUPico *)pico success:(BOOL)success
 {
     NSString *result = success ? @"success" : @"failure";
