@@ -19,6 +19,4 @@
 - (void) scan:(CDVInvokedUrlCommand *)command;
 - (void) calibrate:(CDVInvokedUrlCommand *)command;
 
-
-
 @end
