@@ -161,11 +161,9 @@
             str = @"Charged";
             break;
     }
-
     NSDictionary * payload = @{
-            @"connection": [NSString stringWithFormat:@"Battery status: %@", str]
+        @"batteryStatus": str
         };
-
         [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryStatus" object:nil userInfo:payload];
 }
 
