@@ -162,7 +162,7 @@
             break;
     }
     NSDictionary * payload = @{
-        @"batteryStatus": str
+        @"connection": [NSString str]
         };
         [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryStatus" object:nil userInfo:payload];
 }
