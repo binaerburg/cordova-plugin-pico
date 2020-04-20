@@ -1,5 +1,5 @@
 {
-  "name": "pico-plugin",
+  "name": "cordova-plugin-pico",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
