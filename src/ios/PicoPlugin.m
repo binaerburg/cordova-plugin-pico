@@ -92,6 +92,11 @@
     {
         [_pico disconnect];
         _pico = nil;
+        NSDictionary * payload = @{
+                    @"connection": [NSNumber numberWithBool:NO]
+                };
+
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
     }
 }
 
