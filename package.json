@@ -1,0 +1,8 @@
+{
+  "name": "cordova-plugin-pico",
+  "version": "1.0.1",
+  "description": "",
+  "author": "Binärburg GbR",
+  "license": "MIT",
+  "dependencies": {}
+}
