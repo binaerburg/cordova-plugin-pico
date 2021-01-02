@@ -1,2 +1,2 @@
 ./src/android/.gradle.4.3.1
-./src/android/.idea
+*.idea
