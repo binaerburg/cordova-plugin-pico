@@ -1,7 +1,5 @@
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
-# cordova-plugin-document-scanner [![npm version](https://badge.fury.io/js/cordova-plugin-pico.svg)](//npmjs.com/package/cordova-plugin-pico)
-
->  **DOCUMENTATION** - This doc explains the use of plugin ver 4.x.x. For documentation of ver 3.x.x of the plugin, please see the branch [ver/3.x.x](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/tree/ver/3.x.x) on github. For ver 2.x.x and below please read the documentation within each of the npm releases.
+# cordova-plugin-pico [![npm version](https://badge.fury.io/js/cordova-plugin-pico.svg)](//npmjs.com/package/cordova-plugin-pico)
 
 This plugin integrates an interface in order to interact with the `Pico Colour Scanner` from [Palette](https://palette.com/pico/)
 You can integrate the cordova plugin into your `IONIC`- or `CORDOVA`-APP in order to connect to a Pico sensors directly within your app.
