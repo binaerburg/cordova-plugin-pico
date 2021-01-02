@@ -4,6 +4,7 @@
 
 @implementation PicoPlugin
 
+//intialize connector
 - (void)init:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Inititalize...");
@@ -14,6 +15,7 @@
    }
 }
 
+//destroy the connection
 - (void) destroy:(CDVInvokedUrlCommand*)command {
     if (_pico != nil)
         {
@@ -24,6 +26,7 @@
     NSLog(@"destroyed");
 }
 
+//second connector init, usually not required
 - (void)triggerInititalize:(CDVInvokedUrlCommand*)command
 {
     NSLog(@"Trigger Inititalize...");
@@ -34,6 +37,7 @@
    }
 }
 
+//establish connection to pico
 - (void)connect:(CDVInvokedUrlCommand*)command
 {
    if (_picoConnector == nil)
@@ -49,6 +53,7 @@
   [_picoConnector connect];
 }
 
+//connection established successfully
 - (void)onConnectSuccess:(CUPico *)pico
 {
     NSLog(@"Pico conntected");
@@ -63,8 +68,7 @@
             @"connection": [NSNumber numberWithBool:YES]
         };
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
-
+   [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
 
    NSDictionary * payloadInfo = @{
                       @"name": [NSString stringWithFormat:@"%@", _pico.name],
@@ -73,10 +77,9 @@
                   };
 
    [[NSNotificationCenter defaultCenter] postNotificationName:@"picoInfo" object:nil userInfo:payloadInfo];
-
-
 }
 
+//connection failed
 - (void)onConnectFail:(NSError *)error
 {
     NSDictionary * payload = @{
@@ -85,7 +88,7 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
 }
 
-
+//disconnect from pico
 - (void)disconnect:(CDVInvokedUrlCommand *)command;
 {
     if (_pico != nil)
@@ -100,6 +103,7 @@
     }
 }
 
+//scan colours with pico
 - (void)scan:(CDVInvokedUrlCommand *)command
 {
     [_pico sendLabDataRequest];
@@ -120,6 +124,7 @@
 
 }
 
+// on Disconnect
 - (void)onDisconnect:(CUPico *)pico error:(NSError *)error
 {
      NSDictionary * payload = @{
@@ -129,7 +134,7 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
 }
 
-
+//getting the LAB colours from PICO
 - (void)onFetchLabData:(CUPico *)pico lab:(CULAB *)lab
 {
     NSDictionary * payload = @{
@@ -140,7 +145,7 @@
 }
 
 
-
+//get Battery level of pico
 - (void)onFetchBatteryLevel:(CUPico *)pico level:(NSInteger)level
 {
 
@@ -151,6 +156,7 @@
      [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryLevel" object:nil userInfo:payload];
 }
 
+//get Battery status from pico
 - (void)onFetchBatteryStatus:(CUPico *)pico status:(CUBatteryStatus)status
 {
     NSString *str = @"Unknown";
@@ -171,6 +177,5 @@
         };
         [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryStatus" object:nil userInfo:payload];
 }
-
 
 @end
