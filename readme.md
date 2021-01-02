@@ -3,9 +3,8 @@
 
 >  **DOCUMENTATION** - This doc explains the use of plugin ver 4.x.x. For documentation of ver 3.x.x of the plugin, please see the branch [ver/3.x.x](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/tree/ver/3.x.x) on github. For ver 2.x.x and below please read the documentation within each of the npm releases.
 
-This plugin defines a global `scan` object, which provides an API to scan the document using camera (iOS and Android) or by choosing an image from the system's photo library (Android). The plugin does provide edge detection while scanning.
-
-Although the object is attached to the global scoped `window`, it is not available until after the `deviceready` event.
+This plugin integrates an interface in order to interact with the `Pico Colour Scanner` from `Palette`. (https://palette.com/pico/)
+You can integrate the cordova plugin into your `IONIC`- or `CORDOVA`-APP in order to connect to a Pico sensors directly within your app.
 
 ```js
 document.addEventListener("deviceready", onDeviceReady, false);
