@@ -2,6 +2,18 @@
   "name": "cordova-plugin-pico",
   "version": "1.0.0",
   "description": "",
+   "cordova": {
+    "id": "de.binaerburg.plugin-pico",
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
