@@ -2,6 +2,18 @@
   "name": "@binaerburg/cordova-plugin-pico",
   "version": "0.1.2",
   "description": "",
+  "cordova": {
+    "id": "de.binaerburg.plugin-pico",
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
   "author": "Binärburg GbR",
   "license": "MIT",
   "dependencies": {}
