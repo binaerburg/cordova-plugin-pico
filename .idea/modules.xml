@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/cordova-plugin-pico.iml" filepath="$PROJECT_DIR$/cordova-plugin-pico.iml" group="cordova-plugin-pico" />
+      <module fileurl="file://$PROJECT_DIR$/cordova-plugin-pico.iml" filepath="$PROJECT_DIR$/cordova-plugin-pico.iml" />
     </modules>
   </component>
 </project>

@@ -15,27 +15,18 @@ import android.content.Context;
 import android.util.Log;
 import android.os.Bundle;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
-
-// TODO: Durch androidx ersetzen?
-// import android.support.v4.app.ActivityCompat;
-// import android.support.v4.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.palette.picoio.color.LAB;
-import com.palette.picoio.color.Swatch;
-import com.palette.picoio.color.Match;
 import com.palette.picoio.color.SensorData;
-import com.palette.picoio.color.SwatchMatcher;
 import com.palette.picoio.hardware.Pico;
 import com.palette.picoio.hardware.PicoConnectorListener;
 import com.palette.picoio.hardware.PicoError;
 import com.palette.picoio.hardware.PicoListener;
 import com.palette.picoio.hardware.PicoConnector;
-import com.palette.picoio.utils.Permissions;
 
 
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
@@ -188,7 +179,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
             cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
         } else {
             PicoConnector.getInstance(activity).connect();
-            new Timer().schedule(new TimerTask() {          
+            new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     if (_pico == null) {
@@ -237,7 +228,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         if (_curConnectCallbackContext != null) {
             _curConnectCallbackContext.success("Pico connected");
         }
-        
+
         // broadcast connect
         final Bundle connectionBundle = new Bundle();
         connectionBundle.putBoolean("connection", true);
