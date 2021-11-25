@@ -1,45 +1,46 @@
 package cordova.plugin.pico;
 
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.CallbackContext;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.content.Context;
-import android.util.Log;
-import android.os.Bundle;
 import android.content.Intent;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.util.Log;
 
 import com.palette.picoio.color.LAB;
 import com.palette.picoio.color.SensorData;
 import com.palette.picoio.hardware.Pico;
+import com.palette.picoio.hardware.PicoConnector;
 import com.palette.picoio.hardware.PicoConnectorListener;
 import com.palette.picoio.hardware.PicoError;
 import com.palette.picoio.hardware.PicoListener;
-import com.palette.picoio.hardware.PicoConnector;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
 
-    private static final int REQUEST_PERMISSION_LOCATION = 0;
+    private static final int REQUEST_ACCESS_LOCATION = 2;
+
     private Activity activity = null;
-    private static Context context = null;
+    private Context context = null;
 
     // Reference to the web view for static access
     private static CordovaWebView webView = null;
 
     // Pico instance holder
-    private Pico _pico;
+    private Pico _pico = null;
 
     // current callback contexts -- Used to send data back to app
     // These are currently not used -> we use Intents to broadcast messages!
@@ -64,14 +65,14 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         PicoPlugin.webView = webView;
         activity = this.cordova.getActivity();
-        context = activity.getApplicationContext();
+        context = this.cordova.getActivity().getApplicationContext();
         log("Plugin Activity: " + this.toString());
         log("Cordova Activity: " + this.cordova.toString());
         log("Parent App Activity: " + activity.toString());
         log("Parent App Context: " + context.toString());
         log("Web View: " + PicoPlugin.webView.toString());
 
-        PicoConnector.getInstance(activity).setListener((PicoConnectorListener)this);
+        PicoConnector.getInstance(context).setListener((PicoConnectorListener)this);
         log("Plugin initialized successfully!");
     }
 
@@ -123,11 +124,12 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * Only relevant in Android 6+ where we must handle requesting location permissions.
      */
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
-        log("On Request Permission Result");
+        log("On Request Permission Result. Code: " + requestCode);
+        log("On Request Permission Results. Granted: " + grantResults[0] + "," + grantResults[1]);
         switch (requestCode) {
-            case REQUEST_PERMISSION_LOCATION:
+            case REQUEST_ACCESS_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    PicoConnector.getInstance(activity).connect();
+                    PicoConnector.getInstance(context).connect();
                 break;
         }
     }
@@ -175,21 +177,21 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
 
-        if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (!cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            cordova.requestPermission(this, REQUEST_ACCESS_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
         } else {
-            PicoConnector.getInstance(activity).connect();
+            PicoConnector.getInstance(context).connect();
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     if (_pico == null) {
                         log("Connection Timeout");
-                        PicoConnector.getInstance(activity).cancelConnect();
+                        PicoConnector.getInstance(context).cancelConnect();
                         // broadcast connection failed [error]
                         final Bundle connectionErrorBundle = new Bundle();
                         connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
                         errorIntent.putExtras(connectionErrorBundle);
-                        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+                        LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
                     }
                 }
             }, 5000);
@@ -233,7 +235,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         final Bundle connectionBundle = new Bundle();
         connectionBundle.putBoolean("connection", true);
         connectionIntent.putExtras(connectionBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(connectionIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(connectionIntent);
 
         // broadcast the sensor info
         final Bundle picoInfoBundle = new Bundle();
@@ -252,7 +254,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         }
 
         picoInfoIntent.putExtras(picoInfoBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(picoInfoIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(picoInfoIntent);
     }
 
     @Override
@@ -266,7 +268,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         final Bundle connectionErrorBundle = new Bundle();
         connectionErrorBundle.putString("error", "Failed to connect to Pico: " + paramPicoError.name());
         errorIntent.putExtras(connectionErrorBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
     }
 
     @Override
@@ -280,7 +282,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         final Bundle connectionBundle = new Bundle();
         connectionBundle.putBoolean("connection", false);
         connectionIntent.putExtras(connectionBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(connectionIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(connectionIntent);
     }
 
     @Override
@@ -301,7 +303,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         singleLABParts.putFloat("b", lab.b);
         labBundle.putBundle("lab", singleLABParts);
         labIntent.putExtras(labBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(labIntent);
     }
 
     @Override
@@ -316,7 +318,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         singleSensorDataParts.putInt("b", sensorData.b);
         sensorDataBundle.putBundle("sensorData", singleSensorDataParts);
         sensorDataIntent.putExtras(sensorDataBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(sensorDataIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(sensorDataIntent);
     }
 
     @Override
@@ -330,7 +332,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         final Bundle calibrationBundle = new Bundle();
         calibrationBundle.putString("calibrationResult", result.name());
         calibrationIntent.putExtras(calibrationBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(calibrationIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(calibrationIntent);
     }
 
     @Override
@@ -341,7 +343,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         final Bundle batteryLevelBundle = new Bundle();
         batteryLevelBundle.putInt("batteryLevel", level);
         batteryLevelIntent.putExtras(batteryLevelBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(batteryLevelIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(batteryLevelIntent);
     }
     @Override
     public final void onFetchBatteryStatus(Pico pico, Pico.BatteryStatus status) {
@@ -351,6 +353,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         final Bundle batteryStatusBundle = new Bundle();
         batteryStatusBundle.putString("batteryStatus", status.toString());
         batteryStatusIntent.putExtras(batteryStatusBundle);
-        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(batteryStatusIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(batteryStatusIntent);
     }
 }

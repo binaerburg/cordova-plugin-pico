@@ -5,146 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34d28bda-f114-4378-a132-9b0ac2325713" name="Default Changelist" comment="Added the disconnect Callback function. Before the Pico was disconnected, but the App context was still showing as connected - for this reason we could even not connect again from app.">
-      <change afterPath="$PROJECT_DIR$/.gradle/6.8/executionHistory/executionHistory.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/6.8/fileHashes/fileHashes.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gradle/checksums/checksums.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.10.1/fileChanges/last-build.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/fileChanges/last-build.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.10.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/executionHistory/executionHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.10.1/fileHashes/fileHashes.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.10.1/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/gc.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.10.1/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/fileHashes/fileHashes.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/4.10.1/taskHistory/taskHistory.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.0-20191016123526+0000/fileChanges/last-build.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.0-20191016123526+0000/fileHashes/fileHashes.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.0-20191016123526+0000/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/configuration-cache/gc.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.8/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.8/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.8/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/6.8/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.8/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/vcsWorkingDirs/gc.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.project" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.buildship.core.prefs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/images/setup1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/images/setup2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/images/setup3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/strapdown.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/strapdown.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/amelia.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/bootstrap-responsive.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/bootstrap.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/cerulean.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/cyborg.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/journal.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/readable.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/simplex.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/slate.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/spacelab.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/spruce.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/superhero.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/Documentation/strapdown/themes/united.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/project.pbxproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/project.xcworkspace/contents.xcworkspacedata" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/project.xcworkspace/xcuserdata/David.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/project.xcworkspace/xcuserdata/palettemacbookpro1.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/project.xcworkspace/xcuserdata/palettemacbookpro1.xcuserdatad/xcschemes/xcschememanagement.plist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/xcuserdata/David.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/xcuserdata/David.xcuserdatad/xcschemes/xcschememanagement.plist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/xcuserdata/palettemacbookpro1.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/xcuserdata/palettemacbookpro1.xcuserdatad/xcschemes/PicoSDKDemo.xcscheme" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo.xcodeproj/xcuserdata/palettemacbookpro1.xcuserdatad/xcschemes/xcschememanagement.plist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/AppDelegate.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/AppDelegate.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/Assets.xcassets/AppIcon.appiconset/Contents.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/Base.lproj/LaunchScreen.storyboard" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/Base.lproj/Main.storyboard" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/Info.plist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/ViewController.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/ViewController.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CULAB.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CUMatch.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CUPico.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CUPicoConnector.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CUSensorData.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CUSwatch.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/CUSwatchMatcher.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/include/PicoSDK.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/lib/libPicoSDK.a" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/PicoSDKDemo/PicoSDKDemo/main.m" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CULAB.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CUMatch.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CUPico.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CUPicoConnector.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CUSensorData.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CUSwatch.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/CUSwatchMatcher.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/include/PicoSDK.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_1.1.3/StandaloneLib/libPicoSDK.a" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/4.6/fileChanges/last-build.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/4.6/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/4.6/taskHistory/taskHistory.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.gradle/vcsWorkingDirs/gc.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.idea/PicoIO_Android_1.1.3.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.idea/codeStyles/Project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/strapdown.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/strapdown.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/amelia.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/bootstrap-responsive.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/bootstrap.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/cerulean.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/cyborg.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/journal.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/readable.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/simplex.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/slate.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/spacelab.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/spruce.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/superhero.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/Documentation/strapdown/themes/united.min.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/.project" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/.settings/org.eclipse.buildship.core.prefs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/.classpath" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/.project" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/.settings/org.eclipse.buildship.core.prefs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/libs/PicoIO.aar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/proguard-rules.pro" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/src/main/AndroidManifest.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/src/main/java/com/palette/picoio/demo/ExampleColorDbProvider.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/src/main/java/com/palette/picoio/demo/MainActivity.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/src/main/res/layout/activity_main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/bin/src/main/res/values/strings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/libs/PicoIO.aar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/proguard-rules.pro" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/src/main/AndroidManifest.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/src/main/java/com/palette/picoio/demo/ExampleColorDbProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/src/main/java/com/palette/picoio/demo/MainActivity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/src/main/res/layout/activity_main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/app/src/main/res/values/strings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/gradle.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/PicoIO-Demo/settings.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bibs/PicoIO_Android_1.1.3/StandaloneLib/PicoIO.aar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cordova-plugin-pico.iml" beforeDir="false" afterPath="$PROJECT_DIR$/cordova-plugin-pico.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/android/PicoPlugin.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/PicoPlugin.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/android/PicoPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/PicoPlugin.java" afterDir="false" />
     </list>
@@ -152,6 +20,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
   </component>
   <component name="DefaultGradleProjectSettings">
     <option name="testRunner" value="GRADLE" />
@@ -248,17 +119,17 @@
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico\src\android\libs" />
-      <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico\src\android" />
-      <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico\src\android\libs" />
       <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico\src\android" />
+      <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico\src\android\libs" />
+      <recent name="E:\EigeneDateien\Dokumente\Projekte\cordova-plugin-pico" />
+    </key>
   </component>
-  <component name="RunManager" selected="Gradle.cordova-plugin-pico [components]">
+  <component name="RunManager" selected="Gradle.E:/EigeneDateien/Dokumente/Projekte/cordova-plugin-pico/src/android/PicoPlugin.gradle">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
       <option name="TEST_OBJECT" value="class" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -286,6 +157,25 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration name="E:/EigeneDateien/Dokumente/Projekte/cordova-plugin-pico/src/android/PicoPlugin.gradle" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/src/android/PicoPlugin.gradle" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
     </configuration>
     <configuration name="cordova-plugin-pico [components]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -387,6 +277,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.E:/EigeneDateien/Dokumente/Projekte/cordova-plugin-pico/src/android/PicoPlugin.gradle" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
