@@ -72,7 +72,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Parent App Context: " + context.toString());
         log("Web View: " + PicoPlugin.webView.toString());
 
-        PicoConnector.getInstance(context).setListener((PicoConnectorListener)this);
+        PicoConnector.getInstance(context).setListener((PicoConnectorListener) this);
         log("Plugin initialized successfully!");
     }
 
@@ -81,23 +81,23 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         log("execute called with action [" + action + "], args [" + args.toString() + "], callbackContext [" + callbackContext.toString() + "]");
 
-        if(action.equals("destroy")) {
+        if (action.equals("destroy")) {
             this.destroy(callbackContext);
         }
 
-        if(action.equals("connect")) {
+        if (action.equals("connect")) {
             this.onConnectClick(callbackContext);
         }
 
-        if(action.equals("disconnect")) {
+        if (action.equals("disconnect")) {
             this.onDisconnectClick(callbackContext);
         }
 
-        if(action.equals("scan")) {
+        if (action.equals("scan")) {
             this.onScanClick(callbackContext);
         }
 
-        if(action.equals("calibrate")) {
+        if (action.equals("calibrate")) {
             this.onCalibrateClick(callbackContext);
         }
 
@@ -111,8 +111,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("Destroying plugin");
         super.onDestroy();
 
-        if (_pico != null)
-        {
+        if (_pico != null) {
             _curDisconnectCallbackContext = callback;
             _pico.disconnect();
             _pico = null;
@@ -177,8 +176,14 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
 
-        if (!cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            cordova.requestPermission(this, REQUEST_ACCESS_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
+        String[] permissions = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        };
+
+        if (!cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                !cordova.hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            cordova.requestPermissions(this, REQUEST_ACCESS_LOCATION, permissions);
         } else {
             PicoConnector.getInstance(context).connect();
             new Timer().schedule(new TimerTask() {
@@ -221,7 +226,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // Upon connecting, set the listener for Pico specific callbacks.
         _pico = paramPico;
-        _pico.setListener((PicoListener)this);
+        _pico.setListener((PicoListener) this);
 
         boolean supportedBatteryLevelReq = _pico.sendBatteryLevelRequest();
         boolean supportedBatteryStatusReq = _pico.sendBatteryStatusRequest();
@@ -242,9 +247,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         if (_pico != null) {
             final Bundle singleInfos = new Bundle();
-            log ("Pico Name: " + _pico.getName());
-            log ("Pico Serial: " + _pico.getSerial());
-            log ("Pico BL address: " + _pico.getBluetoothAddress());
+            log("Pico Name: " + _pico.getName());
+            log("Pico Serial: " + _pico.getSerial());
+            log("Pico BL address: " + _pico.getBluetoothAddress());
             singleInfos.putString("name", _pico.getName());
             singleInfos.putString("serial", _pico.getSerial());
             singleInfos.putString("bluetoothAddress", _pico.getBluetoothAddress());
@@ -274,7 +279,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     @Override
     public void onDisconnect(Pico pico) {
         log("Pico disconnected");
-        if(_curDisconnectCallbackContext != null) {
+        if (_curDisconnectCallbackContext != null) {
             _curDisconnectCallbackContext.success("Pico disconnected");
         }
 
@@ -345,6 +350,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         batteryLevelIntent.putExtras(batteryLevelBundle);
         LocalBroadcastManager.getInstance(context).sendBroadcastSync(batteryLevelIntent);
     }
+
     @Override
     public final void onFetchBatteryStatus(Pico pico, Pico.BatteryStatus status) {
         log("Battery status: " + status);
