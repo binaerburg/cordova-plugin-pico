@@ -109,6 +109,13 @@
     [_pico sendLabDataRequest];
 }
 
+//scan raw data from pico with firing LED's
+- (void)scanRaw:(CDVInvokedUrlCommand *)command
+{
+    NSLog(@"Scan Raw Data Request");
+    [_pico sendRawDataRequest];
+}
+
 - (void)calibrate:(CDVInvokedUrlCommand *)command
 {
      [_pico sendCalibrationRequest];
@@ -144,6 +151,18 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"labScan" object:nil userInfo:payload];
 }
 
+//get Raw Data from pico
+- (void)onFetchRawData:(CUPico *)pico raw:(NSArray *)raw
+{
+    NSLog(@"On Fetch Raw Data");
+    NSLog(raw);
+    NSDictionary * payload = @{
+            @"raw": raw,
+        };
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"rawScan" object:nil userInfo:payload];
+}
+
 
 //get Battery level of pico
 - (void)onFetchBatteryLevel:(CUPico *)pico level:(NSInteger)level
@@ -155,6 +174,7 @@
 
      [[NSNotificationCenter defaultCenter] postNotificationName:@"batteryLevel" object:nil userInfo:payload];
 }
+
 
 //get Battery status from pico
 - (void)onFetchBatteryStatus:(CUPico *)pico status:(CUBatteryStatus)status

@@ -48,6 +48,7 @@ typedef NS_ENUM(NSUInteger, CUBatteryStatus)
 
 - (void)onFetchLabData:(CUPico *)pico lab:(CULAB *)lab;
 - (void)onFetchSensorData:(CUPico *)pico sensorData:(CUSensorData *)sensorData;
+- (void)onFetchRawData:(CUPico *)pico rawData:(NSArray *)data;
 
 - (void)onCalibrationComplete:(CUPico *)pico success:(BOOL)success;
 
@@ -74,6 +75,7 @@ typedef NS_ENUM(NSUInteger, CUBatteryStatus)
 
 - (void)sendLabDataRequest;
 - (void)sendSensorDataRequest;
+- (void)sendRawDataRequest;
 
 - (void)sendCalibrationRequest;
 - (BOOL)sendBatteryLevelRequest;
