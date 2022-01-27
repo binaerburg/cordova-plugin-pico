@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-    <string>We need this for the Pico Connection</string>
+    <string>We need this for the UV Analyzer Connection</string>
 </dict>
 </plist>
