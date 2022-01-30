@@ -25,6 +25,7 @@ import org.json.JSONException;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Arrays;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -54,6 +55,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     private final Intent connectionIntent = new Intent("connection");
     private final Intent calibrationIntent = new Intent("calibration");
     private final Intent labIntent = new Intent("labScan");
+    private final Intent rawIntent = new Intent("rawScan");
     private final Intent sensorDataIntent = new Intent("sensorData");
     private final Intent batteryLevelIntent = new Intent("batteryLevel");
     private final Intent batteryStatusIntent = new Intent("batteryStatus");
@@ -95,6 +97,10 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         if (action.equals("scan")) {
             this.onScanClick(callbackContext);
+        }
+
+        if (action.equals("scanRaw")) {
+            this.onScanRawClick(callbackContext);
         }
 
         if (action.equals("calibrate")) {
@@ -155,6 +161,18 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // lab values with led support
         _pico.sendLabDataRequest();
+    }
+
+    /**
+     * scan a color and retunr the raw RGB values with each LED firing
+     */
+    public void onScanRawClick(CallbackContext callbackContext) {
+        log("Scan Raw clicked");
+        if (_pico != null)
+            _curScanCallbackContext = callbackContext;
+
+        // raw RGB values with led support
+        _pico.sendRawDataRequest();
     }
 
     /**
@@ -297,9 +315,6 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
             _curScanCallbackContext.success(lab.toString());
         }
 
-        // additionally get raw sensor data without firing leds
-        _pico.sendSensorDataRequest();
-
         // broadcast lab
         final Bundle labBundle = new Bundle();
         final Bundle singleLABParts = new Bundle();
@@ -309,6 +324,21 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         labBundle.putBundle("lab", singleLABParts);
         labIntent.putExtras(labBundle);
         LocalBroadcastManager.getInstance(context).sendBroadcastSync(labIntent);
+    }
+
+    @Override
+    public void onFetchRawData(Pico pico, int[] rawData) {
+        ArrayList<int> rawDataList = Arrays.asList(rawData);
+        log("Received raw RGB data: " + Arrays.toString(rawData));
+        if (_curScanCallbackContext != null) {
+            _curScanCallbackContext.success(Arrays.toString(rawData));
+        }
+
+        // broadcast raw RGB
+        final Bundle rawBundle = new Bundle();
+        rawBundle.putIntArrayList("raw", rawDataList);
+        rawIntent.putExtras(rawBundle);
+        LocalBroadcastManager.getInstance(context).sendBroadcastSync(rawIntent);
     }
 
     @Override
