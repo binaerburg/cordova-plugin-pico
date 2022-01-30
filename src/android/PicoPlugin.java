@@ -27,6 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -329,7 +330,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public void onFetchRawData(Pico pico, int[] rawData) {
-        ArrayList<Integer> rawDataList = Arrays.asList(rawData);
+        ArrayList<Integer> rawDataList = (ArrayList<Integer>) Arrays.stream(rawData).boxed().collect(Collectors.toList());
         log("Received raw RGB data: " + Arrays.toString(rawData));
         if (_curScanCallbackContext != null) {
             _curScanCallbackContext.success(Arrays.toString(rawData));
@@ -337,7 +338,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         // broadcast raw RGB
         final Bundle rawBundle = new Bundle();
-        rawBundle.putIntArrayList("raw", rawDataList);
+        rawBundle.putIntegerArrayList("raw", rawDataList);
         rawIntent.putExtras(rawBundle);
         LocalBroadcastManager.getInstance(context).sendBroadcastSync(rawIntent);
     }
