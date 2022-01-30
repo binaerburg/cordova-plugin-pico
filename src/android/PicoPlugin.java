@@ -328,7 +328,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public void onFetchRawData(Pico pico, int[] rawData) {
-        ArrayList<int> rawDataList = Arrays.asList(rawData);
+        ArrayList<Integer> rawDataList = Arrays.asList(rawData);
         log("Received raw RGB data: " + Arrays.toString(rawData));
         if (_curScanCallbackContext != null) {
             _curScanCallbackContext.success(Arrays.toString(rawData));

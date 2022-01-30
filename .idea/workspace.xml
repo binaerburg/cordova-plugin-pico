@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34d28bda-f114-4378-a132-9b0ac2325713" name="Default Changelist" comment="Added the disconnect Callback function. Before the Pico was disconnected, but the App context was still showing as connected - for this reason we could even not connect again from app.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/android/PicoIO.aar" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/PicoIO.aar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/android/PicoIO.aar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/android/PicoPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/PicoPlugin.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,6 +106,7 @@
     <property name="android.project.structure.last.selected" value="SDK Location" />
     <property name="android.project.structure.proportion" value="0.15" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/src/android" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="not.eligible.for.single.variant.sync" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
@@ -287,7 +287,7 @@
       <option name="presentableId" value="Default" />
       <updated>1576409656443</updated>
       <workItem from="1587976562845" duration="2854000" />
-      <workItem from="1643584235192" duration="546000" />
+      <workItem from="1643584235192" duration="751000" />
     </task>
     <task id="LOCAL-00001" summary="Added the disconnect Callback function. Before the Pico was disconnected, but the App context was still showing as connected - for this reason we could even not connect again from app.">
       <created>1587978277979</created>
