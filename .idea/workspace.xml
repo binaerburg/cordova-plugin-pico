@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="34d28bda-f114-4378-a132-9b0ac2325713" name="Default Changelist" comment="Added the disconnect Callback function. Before the Pico was disconnected, but the App context was still showing as connected - for this reason we could even not connect again from app.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/android/PicoPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/android/PicoPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/PicoPlugin.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/PicoPlugin.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -287,7 +287,7 @@
       <option name="presentableId" value="Default" />
       <updated>1576409656443</updated>
       <workItem from="1587976562845" duration="2854000" />
-      <workItem from="1643584235192" duration="1141000" />
+      <workItem from="1643584235192" duration="1925000" />
     </task>
     <task id="LOCAL-00001" summary="Added the disconnect Callback function. Before the Pico was disconnected, but the App context was still showing as connected - for this reason we could even not connect again from app.">
       <created>1587978277979</created>
