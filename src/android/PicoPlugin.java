@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
 
     private static final int REQUEST_ACCESS_LOCATION = 2;
+    private static final String PICO_NAME_OVERRIDE = "Pico";
 
     private Activity activity = null;
     private Context context = null;
@@ -83,7 +83,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 
-        log("execute called with action [" + action + "], args [" + args.toString() + "], callbackContext [" + callbackContext.toString() + "]");
+        log("execute called with action [" + action + "], args [" + args.toString() + "], callbackContext ["
+                + callbackContext.toString() + "]");
 
         if (action.equals("destroy")) {
             this.destroy(callbackContext);
@@ -124,13 +125,15 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
             _pico.disconnect();
             _pico = null;
         }
-        callback.success("pico context destroyed");
+        callback.success(PICO_NAME_OVERRIDE + " context destroyed");
     }
 
     /**
-     * Only relevant in Android 6+ where we must handle requesting location permissions.
+     * Only relevant in Android 6+ where we must handle requesting location
+     * permissions.
      */
-    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults)
+            throws JSONException {
         log("On Request Permission Result. Code: " + requestCode);
         log("On Request Permission Results. Granted: " + grantResults[0] + "," + grantResults[1]);
         switch (requestCode) {
@@ -214,7 +217,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
                         PicoConnector.getInstance(context).cancelConnect();
                         // broadcast connection failed [error]
                         final Bundle connectionErrorBundle = new Bundle();
-                        connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
+                        connectionErrorBundle.putString("error",
+                                "Failed to connect to " + PICO_NAME_OVERRIDE + ": TIMEOUT");
                         errorIntent.putExtras(connectionErrorBundle);
                         LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
                     }
@@ -242,7 +246,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public void onConnectSuccess(Pico paramPico) {
-        log("Pico connected");
+        log(PICO_NAME_OVERRIDE + " connected");
 
         // Upon connecting, set the listener for Pico specific callbacks.
         _pico = paramPico;
@@ -251,9 +255,10 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         boolean supportedBatteryLevelReq = _pico.sendBatteryLevelRequest();
         boolean supportedBatteryStatusReq = _pico.sendBatteryStatusRequest();
 
-        log("Battery Level Request Supported: " + supportedBatteryLevelReq + ", Battery Level Request Supported: " + supportedBatteryStatusReq);
+        log("Battery Level Request Supported: " + supportedBatteryLevelReq + ", Battery Level Request Supported: "
+                + supportedBatteryStatusReq);
         if (_curConnectCallbackContext != null) {
-            _curConnectCallbackContext.success("Pico connected");
+            _curConnectCallbackContext.success(PICO_NAME_OVERRIDE + " connected");
         }
 
         // broadcast connect
@@ -267,9 +272,9 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         if (_pico != null) {
             final Bundle singleInfos = new Bundle();
-            log("Pico Name: " + _pico.getName());
-            log("Pico Serial: " + _pico.getSerial());
-            log("Pico BL address: " + _pico.getBluetoothAddress());
+            log(PICO_NAME_OVERRIDE + " Name: " + _pico.getName());
+            log(PICO_NAME_OVERRIDE + " Serial: " + _pico.getSerial());
+            log(PICO_NAME_OVERRIDE + " BL address: " + _pico.getBluetoothAddress());
             singleInfos.putString("name", _pico.getName());
             singleInfos.putString("serial", _pico.getSerial());
             singleInfos.putString("bluetoothAddress", _pico.getBluetoothAddress());
@@ -284,23 +289,25 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public void onConnectFail(PicoError paramPicoError) {
-        log("Failed to connect to Pico: " + paramPicoError.name());
+        log("Failed to connect to " + PICO_NAME_OVERRIDE + ": " + paramPicoError.name());
         if (_curConnectCallbackContext != null) {
-            _curConnectCallbackContext.error("Failed to connect to Pico: " + paramPicoError.name());
+            _curConnectCallbackContext
+                    .error("Failed to connect to " + PICO_NAME_OVERRIDE + ": " + paramPicoError.name());
         }
 
         // broadcast connection failed [error]
         final Bundle connectionErrorBundle = new Bundle();
-        connectionErrorBundle.putString("error", "Failed to connect to Pico: " + paramPicoError.name());
+        connectionErrorBundle.putString("error",
+                "Failed to connect to " + PICO_NAME_OVERRIDE + ": " + paramPicoError.name());
         errorIntent.putExtras(connectionErrorBundle);
         LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
     }
 
     @Override
     public void onDisconnect(Pico pico) {
-        log("Pico disconnected");
+        log(PICO_NAME_OVERRIDE + " disconnected");
         if (_curDisconnectCallbackContext != null) {
-            _curDisconnectCallbackContext.success("Pico disconnected");
+            _curDisconnectCallbackContext.success(PICO_NAME_OVERRIDE + " disconnected");
         }
 
         // broadcast disconnect
@@ -330,7 +337,8 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
     @Override
     public void onFetchRawData(Pico pico, int[] rawData) {
-        ArrayList<Integer> rawDataList = (ArrayList<Integer>) Arrays.stream(rawData).boxed().collect(Collectors.toList());
+        ArrayList<Integer> rawDataList = (ArrayList<Integer>) Arrays.stream(rawData).boxed()
+                .collect(Collectors.toList());
         log("Received raw RGB data: " + Arrays.toString(rawData));
         if (_curScanCallbackContext != null) {
             _curScanCallbackContext.success(Arrays.toString(rawData));
