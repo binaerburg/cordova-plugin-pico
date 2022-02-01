@@ -69,7 +69,9 @@
         };
 
    [[NSNotificationCenter defaultCenter] postNotificationName:@"connection" object:nil userInfo:payload];
-
+   NSLog(@"Pico%@", _pico);
+   NSLog(@"Pico%@", _pico.serial);
+   NSLog(@"Pico%@", _pico.name);
    NSDictionary * payloadInfo = @{
                       @"name": [NSString stringWithFormat:@"%@", _pico.name],
                       @"serial": [NSString stringWithFormat:@"%@", _pico.serial],
@@ -152,12 +154,11 @@
 }
 
 //get Raw Data from pico
-- (void)onFetchRawData:(CUPico *)pico raw:(NSArray *)raw
+- (void)onFetchRawData:(CUPico *)pico rawData:(NSArray *)data
 {
     NSLog(@"On Fetch Raw Data");
-    NSLog(raw);
     NSDictionary * payload = @{
-            @"raw": raw,
+            @"raw": data,
         };
 
     [[NSNotificationCenter defaultCenter] postNotificationName:@"rawScan" object:nil userInfo:payload];
