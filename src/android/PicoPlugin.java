@@ -34,7 +34,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
 
     private static final int REQUEST_ACCESS_LOCATION = 2;
-    private static final String PICO_NAME_OVERRIDE = "Pico";
+    private static final String PICO_NAME_OVERRIDE = "UV Analyzer Stick";
 
     private Activity activity = null;
     private Context context = null;
@@ -138,8 +138,24 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         log("On Request Permission Results. Granted: " + grantResults[0] + "," + grantResults[1]);
         switch (requestCode) {
             case REQUEST_ACCESS_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    PicoConnector.getInstance(context).connect();
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        PicoConnector.getInstance(context).connect();
+                    } catch (Exception e) {
+                        log("Failed to connect to " + PICO_NAME_OVERRIDE + ": " + e.getMessage());
+                        if (_curConnectCallbackContext != null) {
+                            _curConnectCallbackContext
+                                    .error("Failed to connect to " + PICO_NAME_OVERRIDE + ": " + e.getMessage());
+                        }
+                
+                        // broadcast connection failed [error]
+                        final Bundle connectionErrorBundle = new Bundle();
+                        connectionErrorBundle.putString("error",
+                                "Failed to connect to " + PICO_NAME_OVERRIDE + ": " + e.getMessage());
+                        errorIntent.putExtras(connectionErrorBundle);
+                        LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
+                    }
+                }
                 break;
         }
     }
@@ -201,29 +217,48 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
 
         String[] permissions = {
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.BLUETOOTH_ADVERTISE
         };
 
-        if (!cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
-                !cordova.hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+        if (!cordova.hasPermission(Manifest.permission.BLUETOOTH_CONNECT) ||
+            !cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             cordova.requestPermissions(this, REQUEST_ACCESS_LOCATION, permissions);
         } else {
-            PicoConnector.getInstance(context).connect();
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (_pico == null) {
-                        log("Connection Timeout");
-                        PicoConnector.getInstance(context).cancelConnect();
-                        // broadcast connection failed [error]
-                        final Bundle connectionErrorBundle = new Bundle();
-                        connectionErrorBundle.putString("error",
-                                "Failed to connect to " + PICO_NAME_OVERRIDE + ": TIMEOUT");
-                        errorIntent.putExtras(connectionErrorBundle);
-                        LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
+            try {
+                PicoConnector.getInstance(context).connect();
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (_pico == null) {
+                            log("Connection Timeout");
+                            PicoConnector.getInstance(context).cancelConnect();
+                            // broadcast connection failed [error]
+                            final Bundle connectionErrorBundle = new Bundle();
+                            connectionErrorBundle.putString("error",
+                                    "Failed to connect to " + PICO_NAME_OVERRIDE + ": TIMEOUT");
+                            errorIntent.putExtras(connectionErrorBundle);
+                            LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
+                        }
                     }
+                }, 5000);
+            } catch (Exception e) {
+                log("Failed to connect to " + PICO_NAME_OVERRIDE + ": " + e.getMessage());
+                if (_curConnectCallbackContext != null) {
+                    _curConnectCallbackContext
+                            .error("Failed to connect to " + PICO_NAME_OVERRIDE + ": " + e.getMessage());
                 }
-            }, 5000);
+        
+                // broadcast connection failed [error]
+                final Bundle connectionErrorBundle = new Bundle();
+                connectionErrorBundle.putString("error",
+                        "Failed to connect to " + PICO_NAME_OVERRIDE + ": " + e.getMessage());
+                errorIntent.putExtras(connectionErrorBundle);
+                LocalBroadcastManager.getInstance(context).sendBroadcastSync(errorIntent);
+            }
         }
     }
 

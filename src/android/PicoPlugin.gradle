@@ -8,11 +8,12 @@ allprojects {
 
 dependencies {
   implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+  implementation "androidx.fragment:fragment:1.5.5" 
   implementation(name:'PicoIO', ext:'aar')
 }
 
 android {
-  compileSdkVersion 30
+  compileSdkVersion 32
   packagingOptions {
     exclude 'META-INF/NOTICE'
     exclude 'META-INF/LICENSE'

@@ -52,7 +52,16 @@
                 <param name="android-package" value="cordova.plugin.pico.PicoPlugin"/>
             </feature>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.BLUETOOTH" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+            <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+            <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+            <uses-feature android:name="android.hardware.bluetooth" android:required="true" />
+            <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+        </config-file>
         <source-file src="src/android/PicoPlugin.java" target-dir="src/cordova/plugin/pico/PicoPlugin"/>
         <lib-file src="src/android/PicoIO.aar"/>
     </platform>
