@@ -216,6 +216,7 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
         _curConnectCallbackContext = callbackContext;
 
         String[] permissions = {
+                Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_CONNECT,
