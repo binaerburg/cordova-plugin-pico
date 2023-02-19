@@ -17,6 +17,7 @@
 - (void) onConnectFail:(NSError *)error;
 - (void) disconnect:(CDVInvokedUrlCommand *)command;
 - (void) scan:(CDVInvokedUrlCommand *)command;
+- (void) scanRaw:(CDVInvokedUrlCommand *)command;
 - (void) calibrate:(CDVInvokedUrlCommand *)command;
 
 @end

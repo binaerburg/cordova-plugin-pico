@@ -24,6 +24,10 @@ module.exports.scan = function (arg0, success, error) {
     exec(success,error,"PicoPlugin", "scan")
 };
 
+module.exports.raw = function (arg0, success, error) {
+    exec(success,error,"PicoPlugin", "scanRaw")
+};
+
 module.exports.calibrate = function (arg0, success, error) {
     exec(success,error,"PicoPlugin", "calibrate")
 };
