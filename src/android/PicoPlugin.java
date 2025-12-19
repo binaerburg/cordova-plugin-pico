@@ -15,7 +15,7 @@ import android.content.Context;
 import android.util.Log;
 import android.os.Bundle;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 // TODO: Durch androidx ersetzen?
 // import android.support.v4.app.ActivityCompat;
@@ -35,12 +35,12 @@ import com.palette.picoio.hardware.PicoConnectorListener;
 import com.palette.picoio.hardware.PicoError;
 import com.palette.picoio.hardware.PicoListener;
 import com.palette.picoio.hardware.PicoConnector;
-import com.palette.picoio.utils.Permissions;
 
 
 public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
 
     private static final int REQUEST_PERMISSION_LOCATION = 0;
+    private static final int REQUEST_PERMISSION_BLE = 1;
     private Activity activity = null;
     private static Context context = null;
 
@@ -132,11 +132,40 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      * Only relevant in Android 6+ where we must handle requesting location permissions.
      */
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
-        log("On Request Permission Result");
+        log("On Request Permission Result: " + requestCode);
         switch (requestCode) {
             case REQUEST_PERMISSION_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    PicoConnector.getInstance(activity).connect();
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Delay slightly to allow permission system to fully propagate
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            activity.runOnUiThread(() -> startConnectWithTimeout());
+                        }
+                    }, 300);
+                }
+                break;
+            case REQUEST_PERMISSION_BLE:
+                boolean allGranted = true;
+                if (grantResults != null) {
+                    for (int r : grantResults) {
+                        if (r != PackageManager.PERMISSION_GRANTED) {
+                            allGranted = false;
+                            break;
+                        }
+                    }
+                }
+                if (allGranted) {
+                    // Delay slightly to allow permission system to fully propagate
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            activity.runOnUiThread(() -> startConnectWithTimeout());
+                        }
+                    }, 300);
+                } else {
+                    log("BLE permissions denied");
+                }
                 break;
         }
     }
@@ -180,29 +209,52 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, 
      */
     public void onConnectClick(CallbackContext callbackContext) {
         log("Connect clicked");
-        // Bluetooth in Android 6+ requires location permission to function
-        // so we request it here before continuing.
         _curConnectCallbackContext = callbackContext;
 
-        if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
+        // Build permission list depending on platform capabilities.
+        // Android 12+ requires BLUETOOTH_SCAN/CONNECT; older stacks use coarse/fine location.
+        boolean supportsModernBle = android.os.Build.VERSION.SDK_INT >= 31;
+
+        if (supportsModernBle) {
+            String[] needed = new String[] {
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                // Some BLE stacks still require location even with neverForLocation flag.
+                Manifest.permission.ACCESS_FINE_LOCATION
+            };
+            boolean hasScan = cordova.hasPermission(Manifest.permission.BLUETOOTH_SCAN);
+            boolean hasConnect = cordova.hasPermission(Manifest.permission.BLUETOOTH_CONNECT);
+            boolean hasLocation = cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+            if (!hasScan || !hasConnect || !hasLocation) {
+                cordova.requestPermissions(this, REQUEST_PERMISSION_BLE, needed);
+                return;
+            }
         } else {
-            PicoConnector.getInstance(activity).connect();
-            new Timer().schedule(new TimerTask() {          
-                @Override
-                public void run() {
-                    if (_pico == null) {
-                        log("Connection Timeout");
-                        PicoConnector.getInstance(activity).cancelConnect();
-                        // broadcast connection failed [error]
-                        final Bundle connectionErrorBundle = new Bundle();
-                        connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
-                        errorIntent.putExtras(connectionErrorBundle);
-                        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
-                    }
-                }
-            }, 5000);
+            if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
+                return;
+            }
         }
+
+        startConnectWithTimeout();
+    }
+
+    private void startConnectWithTimeout() {
+        log("Starting Pico connection...");
+        PicoConnector.getInstance(activity).connect();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (_pico == null) {
+                    log("Connection Timeout");
+                    PicoConnector.getInstance(activity).cancelConnect();
+                    final Bundle connectionErrorBundle = new Bundle();
+                    connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
+                    errorIntent.putExtras(connectionErrorBundle);
+                    LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+                }
+            }
+        }, 10000);
     }
 
     /**
