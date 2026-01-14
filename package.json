@@ -1,6 +1,6 @@
 {
   "name": "@binaerburg/cordova-plugin-pico",
-  "version": "0.1.2",
+  "version": "1.0.4",
   "description": "",
   "cordova": {
     "id": "de.binaerburg.plugin-pico",
