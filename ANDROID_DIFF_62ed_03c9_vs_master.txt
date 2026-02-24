@@ -1,0 +1,1267 @@
+Android diff report: 62edb26 and 03c90c0 vs current master
+
+Repository: cordova-plugin-pico
+Current master: a365ae375d848d661a1c43c73a3deb530b90b2fe
+Compared commits:
+- 62edb26c4575be2aee1f8e8ca49369d95c057724
+- 03c90c061f5c208732afb1b7494aa22bec77fa22
+Android scope:
+- plugin.xml
+- src/android/PicoPlugin.java
+
+============================================================
+1) 62edb26 -> master
+============================================================
+Summary stats:
+ 2 files changed, 236 insertions(+), 50 deletions(-)
+
+Explanation:
+- Permission handling was modernized for Android BLE access.
+- Connect flow now branches by SDK level and requests BLUETOOTH_SCAN and BLUETOOTH_CONNECT with location fallback where needed.
+- Connection startup is centralized in startConnectWithTimeout; timeout increased from 5s to 10s; permission callback starts connect after short delay.
+- execute() now returns true immediately for recognized actions.
+- New scanRaw path was added, including callback and broadcast handling.
+- Raw scan now converts LAB to normalized RGB and scales to synthetic raw sensor values for Android compatibility with app expectations.
+- scan and calibrate now return explicit not connected errors.
+- plugin.xml includes version bump to 1.0.4 and XML formatting updates in Android-relevant lines.
+
+Detailed diff:
+diff --git a/plugin.xml b/plugin.xml
+index e9e95a3..1a3f995 100644
+--- a/plugin.xml
++++ b/plugin.xml
+@@ -1,26 +1,26 @@
+ <?xml version='1.0' encoding='utf-8'?>
+-<plugin id="cordova-plugin-pico" version="1.0.3" xmlns="http://apache.org/cordova/ns/plugins/1.0">
++<plugin id="cordova-plugin-pico" version="1.0.4" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+ 
+     <name>Pico-Plugin</name>
+ 
+ 
+     <js-module name="PicoPlugin" src="www/PicoPlugin.js">
+-        <clobbers target="PicoPlugin"/>
++        <clobbers target="PicoPlugin" />
+     </js-module>
+ 
+     <platform name="ios">
+         <config-file parent="/*" target="config.xml">
+             <feature name="PicoPlugin">
+-                <param name="ios-package" value="PicoPlugin" onload="true"/>
++                <param name="ios-package" value="PicoPlugin" onload="true" />
+                 <!-- <param name="onload" value="true"/> -->
+             </feature>
+         </config-file>
+ 
+-        <config-file target="*-Info.plist" parent="UIBackgroundModes"/>
++        <config-file target="*-Info.plist" parent="UIBackgroundModes" />
+         <resource-file src="src/ios/PicoPluginConfig.plist" />
+ 
+-        <source-file src="src/ios/PicoPlugin.m"/>
+-        <header-file src="src/ios/PicoPlugin.h"/>
++        <source-file src="src/ios/PicoPlugin.m" />
++        <header-file src="src/ios/PicoPlugin.h" />
+ 
+         <header-file src="src/ios/PicoSDK.h" />
+         <header-file src="src/ios/CUSwatchMatcher.h" />
+@@ -31,29 +31,32 @@
+         <header-file src="src/ios/CUMatch.h" />
+         <header-file src="src/ios/CULAB.h" />
+         <!-- framework -->
+-        <source-file src="src/ios/libPicoSDK.a" framework="true"/>
++        <source-file src="src/ios/libPicoSDK.a" framework="true" />
+ 
+         <!-- iOS SPermissions -->
+-       <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
+-       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothPeripheralUsageDescription">
+-           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+-       </config-file>
+-       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothAlwaysUsageDescription">
+-           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+-       </config-file>
++        <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
++        <config-file target="src/ios/PicoPluginConfig.plist"
++            parent="NSBluetoothPeripheralUsageDescription">
++            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
++        </config-file>
++        <config-file target="src/ios/PicoPluginConfig.plist"
++            parent="NSBluetoothAlwaysUsageDescription">
++            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
++        </config-file>
+ 
+     </platform>
+ 
+ 
+     <platform name="android">
+-        <framework src="src/android/PicoPlugin.gradle" custom="true" type="gradleReference"/>
++        <framework src="src/android/PicoPlugin.gradle" custom="true" type="gradleReference" />
+         <config-file parent="/*" target="res/xml/config.xml">
+             <feature name="PicoPlugin">
+-                <param name="android-package" value="cordova.plugin.pico.PicoPlugin"/>
++                <param name="android-package" value="cordova.plugin.pico.PicoPlugin" />
+             </feature>
+         </config-file>
+         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+-        <source-file src="src/android/PicoPlugin.java" target-dir="src/cordova/plugin/pico/PicoPlugin"/>
+-        <lib-file src="src/android/PicoIO.aar"/>
++        <source-file src="src/android/PicoPlugin.java"
++            target-dir="src/cordova/plugin/pico/PicoPlugin" />
++        <lib-file src="src/android/PicoIO.aar" />
+     </platform>
+-</plugin>
++</plugin>
+\ No newline at end of file
+diff --git a/src/android/PicoPlugin.java b/src/android/PicoPlugin.java
+index d221092..b18670d 100644
+--- a/src/android/PicoPlugin.java
++++ b/src/android/PicoPlugin.java
+@@ -15,7 +15,7 @@ import android.content.Context;
+ import android.util.Log;
+ import android.os.Bundle;
+ import android.content.Intent;
+-import android.support.v4.content.LocalBroadcastManager;
++import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+ 
+ // TODO: Durch androidx ersetzen?
+ // import android.support.v4.app.ActivityCompat;
+@@ -35,12 +35,12 @@ import com.palette.picoio.hardware.PicoConnectorListener;
+ import com.palette.picoio.hardware.PicoError;
+ import com.palette.picoio.hardware.PicoListener;
+ import com.palette.picoio.hardware.PicoConnector;
+-import com.palette.picoio.utils.Permissions;
+ 
+ 
+ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
+ 
+     private static final int REQUEST_PERMISSION_LOCATION = 0;
++    private static final int REQUEST_PERMISSION_BLE = 1;
+     private Activity activity = null;
+     private static Context context = null;
+ 
+@@ -55,13 +55,18 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+     private CallbackContext _curConnectCallbackContext = null;
+     private CallbackContext _curDisconnectCallbackContext = null;
+     private CallbackContext _curScanCallbackContext = null;
++    private CallbackContext _curScanRawCallbackContext = null;
+     private CallbackContext _curCalibrateCallbackContext = null;
+ 
++    // Flag to indicate if the current sensor data request is for raw scan
++    private boolean _isRawScanRequest = false;
++
+     // Message Broadcaster
+     private final Intent errorIntent = new Intent("error");
+     private final Intent connectionIntent = new Intent("connection");
+     private final Intent calibrationIntent = new Intent("calibration");
+     private final Intent labIntent = new Intent("labScan");
++    private final Intent rawScanIntent = new Intent("rawScan");
+     private final Intent sensorDataIntent = new Intent("sensorData");
+     private final Intent batteryLevelIntent = new Intent("batteryLevel");
+     private final Intent batteryStatusIntent = new Intent("batteryStatus");
+@@ -91,22 +96,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+ 
+         if(action.equals("destroy")) {
+             this.destroy(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("connect")) {
+             this.onConnectClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("disconnect")) {
+             this.onDisconnectClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("scan")) {
+             this.onScanClick(callbackContext);
++            return true;
++        }
++
++        if(action.equals("scanRaw")) {
++            this.onScanRawClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("calibrate")) {
+             this.onCalibrateClick(callbackContext);
++            return true;
+         }
+ 
+         return false;
+@@ -132,11 +147,40 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      * Only relevant in Android 6+ where we must handle requesting location permissions.
+      */
+     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+-        log("On Request Permission Result");
++        log("On Request Permission Result: " + requestCode);
+         switch (requestCode) {
+             case REQUEST_PERMISSION_LOCATION:
+-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+-                    PicoConnector.getInstance(activity).connect();
++                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
++                    // Delay slightly to allow permission system to fully propagate
++                    new Timer().schedule(new TimerTask() {
++                        @Override
++                        public void run() {
++                            activity.runOnUiThread(() -> startConnectWithTimeout());
++                        }
++                    }, 300);
++                }
++                break;
++            case REQUEST_PERMISSION_BLE:
++                boolean allGranted = true;
++                if (grantResults != null) {
++                    for (int r : grantResults) {
++                        if (r != PackageManager.PERMISSION_GRANTED) {
++                            allGranted = false;
++                            break;
++                        }
++                    }
++                }
++                if (allGranted) {
++                    // Delay slightly to allow permission system to fully propagate
++                    new Timer().schedule(new TimerTask() {
++                        @Override
++                        public void run() {
++                            activity.runOnUiThread(() -> startConnectWithTimeout());
++                        }
++                    }, 300);
++                } else {
++                    log("BLE permissions denied");
++                }
+                 break;
+         }
+     }
+@@ -158,11 +202,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onScanClick(CallbackContext callbackContext) {
+         log("Scan clicked");
+-        if (_pico != null)
++        if (_pico != null) {
+             _curScanCallbackContext = callbackContext;
++            // lab values with led support
++            _pico.sendLabDataRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
++    }
+ 
+-        // lab values with led support
+-        _pico.sendLabDataRequest();
++    /**
++     * scan raw data - uses LAB request to fire LEDs, then captures sensor data
++     * Note: Android SDK doesn't support raw data with per-LED firing like iOS
++     * We use LAB request (fires LEDs) then sensor data request to get RGB values
++     */
++    public void onScanRawClick(CallbackContext callbackContext) {
++        log("Scan Raw clicked");
++        if (_pico != null) {
++            _curScanRawCallbackContext = callbackContext;
++            _isRawScanRequest = true;
++            // Use LAB request to fire LEDs, sensor data will follow in onFetchLabData
++            _pico.sendLabDataRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
+     }
+ 
+     /**
+@@ -170,9 +235,13 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onCalibrateClick(CallbackContext callbackContext) {
+         log("Calibration clicked");
+-        if (_pico != null)
++        if (_pico != null) {
+             _curCalibrateCallbackContext = callbackContext;
+-        _pico.sendCalibrationRequest();
++            _pico.sendCalibrationRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
+     }
+ 
+     /**
+@@ -180,29 +249,52 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onConnectClick(CallbackContext callbackContext) {
+         log("Connect clicked");
+-        // Bluetooth in Android 6+ requires location permission to function
+-        // so we request it here before continuing.
+         _curConnectCallbackContext = callbackContext;
+ 
+-        if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+-            cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
++        // Build permission list depending on platform capabilities.
++        // Android 12+ requires BLUETOOTH_SCAN/CONNECT; older stacks use coarse/fine location.
++        boolean supportsModernBle = android.os.Build.VERSION.SDK_INT >= 31;
++
++        if (supportsModernBle) {
++            String[] needed = new String[] {
++                Manifest.permission.BLUETOOTH_SCAN,
++                Manifest.permission.BLUETOOTH_CONNECT,
++                // Some BLE stacks still require location even with neverForLocation flag.
++                Manifest.permission.ACCESS_FINE_LOCATION
++            };
++            boolean hasScan = cordova.hasPermission(Manifest.permission.BLUETOOTH_SCAN);
++            boolean hasConnect = cordova.hasPermission(Manifest.permission.BLUETOOTH_CONNECT);
++            boolean hasLocation = cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);
++            if (!hasScan || !hasConnect || !hasLocation) {
++                cordova.requestPermissions(this, REQUEST_PERMISSION_BLE, needed);
++                return;
++            }
+         } else {
+-            PicoConnector.getInstance(activity).connect();
+-            new Timer().schedule(new TimerTask() {          
+-                @Override
+-                public void run() {
+-                    if (_pico == null) {
+-                        log("Connection Timeout");
+-                        PicoConnector.getInstance(activity).cancelConnect();
+-                        // broadcast connection failed [error]
+-                        final Bundle connectionErrorBundle = new Bundle();
+-                        connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
+-                        errorIntent.putExtras(connectionErrorBundle);
+-                        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+-                    }
+-                }
+-            }, 5000);
++            if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
++                cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
++                return;
++            }
+         }
++
++        startConnectWithTimeout();
++    }
++
++    private void startConnectWithTimeout() {
++        log("Starting Pico connection...");
++        PicoConnector.getInstance(activity).connect();
++        new Timer().schedule(new TimerTask() {
++            @Override
++            public void run() {
++                if (_pico == null) {
++                    log("Connection Timeout");
++                    PicoConnector.getInstance(activity).cancelConnect();
++                    final Bundle connectionErrorBundle = new Bundle();
++                    connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
++                    errorIntent.putExtras(connectionErrorBundle);
++                    LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
++                }
++            }
++        }, 10000);
+     }
+ 
+     /**
+@@ -295,11 +387,56 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+     @Override
+     public void onFetchLabData(Pico pico, LAB lab) {
+         log("Received LAB: " + lab.toString());
++        
++        // For raw scan requests, convert LAB to sensor-scale raw values
++        // Android SDK doesn't support per-LED raw readings like iOS
++        if (_isRawScanRequest) {
++            _isRawScanRequest = false;
++            log("Raw scan request - converting LAB to raw sensor scale");
++            
++            // Convert LAB to RGB (0-1 range)
++            double[] rgbNorm = labToRgbNormalized(lab.l, lab.a, lab.b);
++            
++            // Scale to sensor raw values using typical white standards:
++            // rwr=2000, gwg=2500, bwb=3660
++            // The app normalizes: value/whiteStandard * 255
++            // So we need: rgbNorm * whiteStandard
++            int rawR = (int) Math.round(rgbNorm[0] * 2000);  // Red LED, R sensor
++            int rawG = (int) Math.round(rgbNorm[1] * 2500);  // Green LED, G sensor  
++            int rawB = (int) Math.round(rgbNorm[2] * 3660);  // Blue LED, B sensor
++            
++            log("Converted RGB normalized: [" + rgbNorm[0] + ", " + rgbNorm[1] + ", " + rgbNorm[2] + "]");
++            log("Converted to raw scale: [" + rawR + ", " + rawG + ", " + rawB + "]");
++            
++            if (_curScanRawCallbackContext != null) {
++                // Format as array: [R.R, R.G, R.B, G.R, G.G, G.B, B.R, B.G, B.B]
++                // Only diagonal values matter for the app's rawRgbToRgb function
++                int[] rawData = new int[] {
++                    rawR, 0, 0,     // Red LED: only R sensor matters
++                    0, rawG, 0,     // Green LED: only G sensor matters
++                    0, 0, rawB      // Blue LED: only B sensor matters
++                };
++                _curScanRawCallbackContext.success(java.util.Arrays.toString(rawData));
++            }
++
++            // broadcast raw scan data
++            final Bundle rawScanBundle = new Bundle();
++            int[] rawData = new int[] {
++                rawR, 0, 0,
++                0, rawG, 0,
++                0, 0, rawB
++            };
++            rawScanBundle.putIntArray("raw", rawData);
++            rawScanIntent.putExtras(rawScanBundle);
++            LocalBroadcastManager.getInstance(activity).sendBroadcastSync(rawScanIntent);
++            return;
++        }
++        
+         if (_curScanCallbackContext != null) {
+             _curScanCallbackContext.success(lab.toString());
+         }
+ 
+-        // additionally get raw sensor data without firing leds
++        // additionally get raw sensor data (for sensorData broadcast)
+         _pico.sendSensorDataRequest();
+ 
+         // broadcast lab
+@@ -312,12 +449,58 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+         labIntent.putExtras(labBundle);
+         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
+     }
++    
++    /**
++     * Convert LAB color space to normalized RGB (0-1 range)
++     * Standard D65 illuminant conversion
++     */
++    private double[] labToRgbNormalized(float l, float a, float b) {
++        // LAB to XYZ
++        double y = (l + 16.0) / 116.0;
++        double x = a / 500.0 + y;
++        double z = y - b / 200.0;
++        
++        // Apply inverse f function
++        double x3 = x * x * x;
++        double y3 = y * y * y;
++        double z3 = z * z * z;
++        
++        x = x3 > 0.008856 ? x3 : (x - 16.0/116.0) / 7.787;
++        y = y3 > 0.008856 ? y3 : (y - 16.0/116.0) / 7.787;
++        z = z3 > 0.008856 ? z3 : (z - 16.0/116.0) / 7.787;
++        
++        // D65 reference white
++        x *= 95.047;
++        y *= 100.0;
++        z *= 108.883;
++        
++        // XYZ to RGB
++        x /= 100.0;
++        y /= 100.0;
++        z /= 100.0;
++        
++        double r = x * 3.2406 + y * -1.5372 + z * -0.4986;
++        double g = x * -0.9689 + y * 1.8758 + z * 0.0415;
++        double bVal = x * 0.0557 + y * -0.2040 + z * 1.0570;
++        
++        // Apply gamma correction
++        r = r > 0.0031308 ? 1.055 * Math.pow(r, 1.0/2.4) - 0.055 : 12.92 * r;
++        g = g > 0.0031308 ? 1.055 * Math.pow(g, 1.0/2.4) - 0.055 : 12.92 * g;
++        bVal = bVal > 0.0031308 ? 1.055 * Math.pow(bVal, 1.0/2.4) - 0.055 : 12.92 * bVal;
++        
++        // Clamp to 0-1 range and return normalized values
++        double rNorm = Math.max(0, Math.min(1, r));
++        double gNorm = Math.max(0, Math.min(1, g));
++        double bNorm = Math.max(0, Math.min(1, bVal));
++        
++        return new double[] { rNorm, gNorm, bNorm };
++    }
+ 
+     @Override
+     public void onFetchSensorData(Pico pico, SensorData sensorData) {
+         log("Received Sensor Data: " + sensorData.toString());
+ 
+-        // broadcast sensor data
++        // Regular sensor data broadcast (raw scans are now handled in onFetchLabData)
+         final Bundle sensorDataBundle = new Bundle();
+         final Bundle singleSensorDataParts = new Bundle();
+         singleSensorDataParts.putInt("r", sensorData.r);
+
+============================================================
+2) 03c90c0 -> master
+============================================================
+Summary stats:
+ 2 files changed, 160 insertions(+), 26 deletions(-)
+
+Explanation:
+- This range mostly contains the Android follow-up feature commit after 03c90c0.
+- Permission and timeout refactor is not new in this range because 03c90c0 already contains it.
+- Added raw scan state members and action route.
+- onFetchLabData now handles raw scan conversion and rawScan broadcast path while preserving normal scan behavior.
+- scan and calibrate include explicit not connected error handling.
+
+Detailed diff:
+
+diff --git a/plugin.xml b/plugin.xml
+index e9e95a3..1a3f995 100644
+--- a/plugin.xml
++++ b/plugin.xml
+@@ -1,26 +1,26 @@
+ <?xml version='1.0' encoding='utf-8'?>
+-<plugin id="cordova-plugin-pico" version="1.0.3" xmlns="http://apache.org/cordova/ns/plugins/1.0">
++<plugin id="cordova-plugin-pico" version="1.0.4" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+ 
+     <name>Pico-Plugin</name>
+ 
+ 
+     <js-module name="PicoPlugin" src="www/PicoPlugin.js">
+-        <clobbers target="PicoPlugin"/>
++        <clobbers target="PicoPlugin" />
+     </js-module>
+ 
+     <platform name="ios">
+         <config-file parent="/*" target="config.xml">
+             <feature name="PicoPlugin">
+-                <param name="ios-package" value="PicoPlugin" onload="true"/>
++                <param name="ios-package" value="PicoPlugin" onload="true" />
+                 <!-- <param name="onload" value="true"/> -->
+             </feature>
+         </config-file>
+ 
+-        <config-file target="*-Info.plist" parent="UIBackgroundModes"/>
++        <config-file target="*-Info.plist" parent="UIBackgroundModes" />
+         <resource-file src="src/ios/PicoPluginConfig.plist" />
+ 
+-        <source-file src="src/ios/PicoPlugin.m"/>
+-        <header-file src="src/ios/PicoPlugin.h"/>
++        <source-file src="src/ios/PicoPlugin.m" />
++        <header-file src="src/ios/PicoPlugin.h" />
+ 
+         <header-file src="src/ios/PicoSDK.h" />
+         <header-file src="src/ios/CUSwatchMatcher.h" />
+@@ -31,29 +31,32 @@
+         <header-file src="src/ios/CUMatch.h" />
+         <header-file src="src/ios/CULAB.h" />
+         <!-- framework -->
+-        <source-file src="src/ios/libPicoSDK.a" framework="true"/>
++        <source-file src="src/ios/libPicoSDK.a" framework="true" />
+ 
+         <!-- iOS SPermissions -->
+-       <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
+-       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothPeripheralUsageDescription">
+-           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+-       </config-file>
+-       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothAlwaysUsageDescription">
+-           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+-       </config-file>
++        <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
++        <config-file target="src/ios/PicoPluginConfig.plist"
++            parent="NSBluetoothPeripheralUsageDescription">
++            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
++        </config-file>
++        <config-file target="src/ios/PicoPluginConfig.plist"
++            parent="NSBluetoothAlwaysUsageDescription">
++            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
++        </config-file>
+ 
+     </platform>
+ 
+ 
+     <platform name="android">
+-        <framework src="src/android/PicoPlugin.gradle" custom="true" type="gradleReference"/>
++        <framework src="src/android/PicoPlugin.gradle" custom="true" type="gradleReference" />
+         <config-file parent="/*" target="res/xml/config.xml">
+             <feature name="PicoPlugin">
+-                <param name="android-package" value="cordova.plugin.pico.PicoPlugin"/>
++                <param name="android-package" value="cordova.plugin.pico.PicoPlugin" />
+             </feature>
+         </config-file>
+         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+-        <source-file src="src/android/PicoPlugin.java" target-dir="src/cordova/plugin/pico/PicoPlugin"/>
+-        <lib-file src="src/android/PicoIO.aar"/>
++        <source-file src="src/android/PicoPlugin.java"
++            target-dir="src/cordova/plugin/pico/PicoPlugin" />
++        <lib-file src="src/android/PicoIO.aar" />
+     </platform>
+-</plugin>
++</plugin>
+\ No newline at end of file
+diff --git a/src/android/PicoPlugin.java b/src/android/PicoPlugin.java
+index d221092..b18670d 100644
+--- a/src/android/PicoPlugin.java
++++ b/src/android/PicoPlugin.java
+@@ -15,7 +15,7 @@ import android.content.Context;
+ import android.util.Log;
+ import android.os.Bundle;
+ import android.content.Intent;
+-import android.support.v4.content.LocalBroadcastManager;
++import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+ 
+ // TODO: Durch androidx ersetzen?
+ // import android.support.v4.app.ActivityCompat;
+@@ -35,12 +35,12 @@ import com.palette.picoio.hardware.PicoConnectorListener;
+ import com.palette.picoio.hardware.PicoError;
+ import com.palette.picoio.hardware.PicoListener;
+ import com.palette.picoio.hardware.PicoConnector;
+-import com.palette.picoio.utils.Permissions;
+ 
+ 
+ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener, PicoListener {
+ 
+     private static final int REQUEST_PERMISSION_LOCATION = 0;
++    private static final int REQUEST_PERMISSION_BLE = 1;
+     private Activity activity = null;
+     private static Context context = null;
+ 
+@@ -55,13 +55,18 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+     private CallbackContext _curConnectCallbackContext = null;
+     private CallbackContext _curDisconnectCallbackContext = null;
+     private CallbackContext _curScanCallbackContext = null;
++    private CallbackContext _curScanRawCallbackContext = null;
+     private CallbackContext _curCalibrateCallbackContext = null;
+ 
++    // Flag to indicate if the current sensor data request is for raw scan
++    private boolean _isRawScanRequest = false;
++
+     // Message Broadcaster
+     private final Intent errorIntent = new Intent("error");
+     private final Intent connectionIntent = new Intent("connection");
+     private final Intent calibrationIntent = new Intent("calibration");
+     private final Intent labIntent = new Intent("labScan");
++    private final Intent rawScanIntent = new Intent("rawScan");
+     private final Intent sensorDataIntent = new Intent("sensorData");
+     private final Intent batteryLevelIntent = new Intent("batteryLevel");
+     private final Intent batteryStatusIntent = new Intent("batteryStatus");
+@@ -91,22 +96,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+ 
+         if(action.equals("destroy")) {
+             this.destroy(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("connect")) {
+             this.onConnectClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("disconnect")) {
+             this.onDisconnectClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("scan")) {
+             this.onScanClick(callbackContext);
++            return true;
++        }
++
++        if(action.equals("scanRaw")) {
++            this.onScanRawClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("calibrate")) {
+             this.onCalibrateClick(callbackContext);
++            return true;
+         }
+ 
+         return false;
+@@ -132,11 +147,40 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      * Only relevant in Android 6+ where we must handle requesting location permissions.
+      */
+     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+-        log("On Request Permission Result");
++        log("On Request Permission Result: " + requestCode);
+         switch (requestCode) {
+             case REQUEST_PERMISSION_LOCATION:
+-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+-                    PicoConnector.getInstance(activity).connect();
++                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
++                    // Delay slightly to allow permission system to fully propagate
++                    new Timer().schedule(new TimerTask() {
++                        @Override
++                        public void run() {
++                            activity.runOnUiThread(() -> startConnectWithTimeout());
++                        }
++                    }, 300);
++                }
++                break;
++            case REQUEST_PERMISSION_BLE:
++                boolean allGranted = true;
++                if (grantResults != null) {
++                    for (int r : grantResults) {
++                        if (r != PackageManager.PERMISSION_GRANTED) {
++                            allGranted = false;
++                            break;
++                        }
++                    }
++                }
++                if (allGranted) {
++                    // Delay slightly to allow permission system to fully propagate
++                    new Timer().schedule(new TimerTask() {
++                        @Override
++                        public void run() {
++                            activity.runOnUiThread(() -> startConnectWithTimeout());
++                        }
++                    }, 300);
++                } else {
++                    log("BLE permissions denied");
++                }
+                 break;
+         }
+     }
+@@ -158,11 +202,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onScanClick(CallbackContext callbackContext) {
+         log("Scan clicked");
+-        if (_pico != null)
++        if (_pico != null) {
+             _curScanCallbackContext = callbackContext;
++            // lab values with led support
++            _pico.sendLabDataRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
++    }
+ 
+-        // lab values with led support
+-        _pico.sendLabDataRequest();
++    /**
++     * scan raw data - uses LAB request to fire LEDs, then captures sensor data
++     * Note: Android SDK doesn't support raw data with per-LED firing like iOS
++     * We use LAB request (fires LEDs) then sensor data request to get RGB values
++     */
++    public void onScanRawClick(CallbackContext callbackContext) {
++        log("Scan Raw clicked");
++        if (_pico != null) {
++            _curScanRawCallbackContext = callbackContext;
++            _isRawScanRequest = true;
++            // Use LAB request to fire LEDs, sensor data will follow in onFetchLabData
++            _pico.sendLabDataRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
+     }
+ 
+     /**
+@@ -170,9 +235,13 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onCalibrateClick(CallbackContext callbackContext) {
+         log("Calibration clicked");
+-        if (_pico != null)
++        if (_pico != null) {
+             _curCalibrateCallbackContext = callbackContext;
+-        _pico.sendCalibrationRequest();
++            _pico.sendCalibrationRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
+     }
+ 
+     /**
+@@ -180,29 +249,52 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onConnectClick(CallbackContext callbackContext) {
+         log("Connect clicked");
+-        // Bluetooth in Android 6+ requires location permission to function
+-        // so we request it here before continuing.
+         _curConnectCallbackContext = callbackContext;
+ 
+-        if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+-            cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
++        // Build permission list depending on platform capabilities.
++        // Android 12+ requires BLUETOOTH_SCAN/CONNECT; older stacks use coarse/fine location.
++        boolean supportsModernBle = android.os.Build.VERSION.SDK_INT >= 31;
++
++        if (supportsModernBle) {
++            String[] needed = new String[] {
++                Manifest.permission.BLUETOOTH_SCAN,
++                Manifest.permission.BLUETOOTH_CONNECT,
++                // Some BLE stacks still require location even with neverForLocation flag.
++                Manifest.permission.ACCESS_FINE_LOCATION
++            };
++            boolean hasScan = cordova.hasPermission(Manifest.permission.BLUETOOTH_SCAN);
++            boolean hasConnect = cordova.hasPermission(Manifest.permission.BLUETOOTH_CONNECT);
++            boolean hasLocation = cordova.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);
++            if (!hasScan || !hasConnect || !hasLocation) {
++                cordova.requestPermissions(this, REQUEST_PERMISSION_BLE, needed);
++                return;
++            }
+         } else {
+-            PicoConnector.getInstance(activity).connect();
+-            new Timer().schedule(new TimerTask() {          
+-                @Override
+-                public void run() {
+-                    if (_pico == null) {
+-                        log("Connection Timeout");
+-                        PicoConnector.getInstance(activity).cancelConnect();
+-                        // broadcast connection failed [error]
+-                        final Bundle connectionErrorBundle = new Bundle();
+-                        connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
+-                        errorIntent.putExtras(connectionErrorBundle);
+-                        LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
+-                    }
+-                }
+-            }, 5000);
++            if (!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
++                cordova.requestPermission(this, REQUEST_PERMISSION_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION);
++                return;
++            }
+         }
++
++        startConnectWithTimeout();
++    }
++
++    private void startConnectWithTimeout() {
++        log("Starting Pico connection...");
++        PicoConnector.getInstance(activity).connect();
++        new Timer().schedule(new TimerTask() {
++            @Override
++            public void run() {
++                if (_pico == null) {
++                    log("Connection Timeout");
++                    PicoConnector.getInstance(activity).cancelConnect();
++                    final Bundle connectionErrorBundle = new Bundle();
++                    connectionErrorBundle.putString("error", "Failed to connect to Pico: TIMEOUT");
++                    errorIntent.putExtras(connectionErrorBundle);
++                    LocalBroadcastManager.getInstance(activity).sendBroadcastSync(errorIntent);
++                }
++            }
++        }, 10000);
+     }
+ 
+     /**
+@@ -295,11 +387,56 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+     @Override
+     public void onFetchLabData(Pico pico, LAB lab) {
+         log("Received LAB: " + lab.toString());
++        
++        // For raw scan requests, convert LAB to sensor-scale raw values
++        // Android SDK doesn't support per-LED raw readings like iOS
++        if (_isRawScanRequest) {
++            _isRawScanRequest = false;
++            log("Raw scan request - converting LAB to raw sensor scale");
++            
++            // Convert LAB to RGB (0-1 range)
++            double[] rgbNorm = labToRgbNormalized(lab.l, lab.a, lab.b);
++            
++            // Scale to sensor raw values using typical white standards:
++            // rwr=2000, gwg=2500, bwb=3660
++            // The app normalizes: value/whiteStandard * 255
++            // So we need: rgbNorm * whiteStandard
++            int rawR = (int) Math.round(rgbNorm[0] * 2000);  // Red LED, R sensor
++            int rawG = (int) Math.round(rgbNorm[1] * 2500);  // Green LED, G sensor  
++            int rawB = (int) Math.round(rgbNorm[2] * 3660);  // Blue LED, B sensor
++            
++            log("Converted RGB normalized: [" + rgbNorm[0] + ", " + rgbNorm[1] + ", " + rgbNorm[2] + "]");
++            log("Converted to raw scale: [" + rawR + ", " + rawG + ", " + rawB + "]");
++            
++            if (_curScanRawCallbackContext != null) {
++                // Format as array: [R.R, R.G, R.B, G.R, G.G, G.B, B.R, B.G, B.B]
++                // Only diagonal values matter for the app's rawRgbToRgb function
++                int[] rawData = new int[] {
++                    rawR, 0, 0,     // Red LED: only R sensor matters
++                    0, rawG, 0,     // Green LED: only G sensor matters
++                    0, 0, rawB      // Blue LED: only B sensor matters
++                };
++                _curScanRawCallbackContext.success(java.util.Arrays.toString(rawData));
++            }
++
++            // broadcast raw scan data
++            final Bundle rawScanBundle = new Bundle();
++            int[] rawData = new int[] {
++                rawR, 0, 0,
++                0, rawG, 0,
++                0, 0, rawB
++            };
++            rawScanBundle.putIntArray("raw", rawData);
++            rawScanIntent.putExtras(rawScanBundle);
++            LocalBroadcastManager.getInstance(activity).sendBroadcastSync(rawScanIntent);
++            return;
++        }
++        
+         if (_curScanCallbackContext != null) {
+             _curScanCallbackContext.success(lab.toString());
+         }
+ 
+-        // additionally get raw sensor data without firing leds
++        // additionally get raw sensor data (for sensorData broadcast)
+         _pico.sendSensorDataRequest();
+ 
+         // broadcast lab
+@@ -312,12 +449,58 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+         labIntent.putExtras(labBundle);
+         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
+     }
++    
++    /**
++     * Convert LAB color space to normalized RGB (0-1 range)
++     * Standard D65 illuminant conversion
++     */
++    private double[] labToRgbNormalized(float l, float a, float b) {
++        // LAB to XYZ
++        double y = (l + 16.0) / 116.0;
++        double x = a / 500.0 + y;
++        double z = y - b / 200.0;
++        
++        // Apply inverse f function
++        double x3 = x * x * x;
++        double y3 = y * y * y;
++        double z3 = z * z * z;
++        
++        x = x3 > 0.008856 ? x3 : (x - 16.0/116.0) / 7.787;
++        y = y3 > 0.008856 ? y3 : (y - 16.0/116.0) / 7.787;
++        z = z3 > 0.008856 ? z3 : (z - 16.0/116.0) / 7.787;
++        
++        // D65 reference white
++        x *= 95.047;
++        y *= 100.0;
++        z *= 108.883;
++        
++        // XYZ to RGB
++        x /= 100.0;
++        y /= 100.0;
++        z /= 100.0;
++        
++        double r = x * 3.2406 + y * -1.5372 + z * -0.4986;
++        double g = x * -0.9689 + y * 1.8758 + z * 0.0415;
++        double bVal = x * 0.0557 + y * -0.2040 + z * 1.0570;
++        
++        // Apply gamma correction
++        r = r > 0.0031308 ? 1.055 * Math.pow(r, 1.0/2.4) - 0.055 : 12.92 * r;
++        g = g > 0.0031308 ? 1.055 * Math.pow(g, 1.0/2.4) - 0.055 : 12.92 * g;
++        bVal = bVal > 0.0031308 ? 1.055 * Math.pow(bVal, 1.0/2.4) - 0.055 : 12.92 * bVal;
++        
++        // Clamp to 0-1 range and return normalized values
++        double rNorm = Math.max(0, Math.min(1, r));
++        double gNorm = Math.max(0, Math.min(1, g));
++        double bNorm = Math.max(0, Math.min(1, bVal));
++        
++        return new double[] { rNorm, gNorm, bNorm };
++    }
+ 
+     @Override
+     public void onFetchSensorData(Pico pico, SensorData sensorData) {
+         log("Received Sensor Data: " + sensorData.toString());
+ 
+-        // broadcast sensor data
++        // Regular sensor data broadcast (raw scans are now handled in onFetchLabData)
+         final Bundle sensorDataBundle = new Bundle();
+         final Bundle singleSensorDataParts = new Bundle();
+         singleSensorDataParts.putInt("r", sensorData.r);
+
+============================================================
+2) 03c90c0 -> master
+============================================================
+Summary stats:
+ 2 files changed, 160 insertions(+), 26 deletions(-)
+
+Explanation:
+- This range mostly contains the Android follow-up feature commit after 03c90c0.
+- Permission and timeout refactor is not new in this range because 03c90c0 already contains it.
+- Added raw scan state members and action route.
+- onFetchLabData now handles raw scan conversion and rawScan broadcast path while preserving normal scan behavior.
+- scan and calibrate include explicit not connected error handling.
+
+Detailed diff:
+diff --git a/plugin.xml b/plugin.xml
+index e9e95a3..1a3f995 100644
+--- a/plugin.xml
++++ b/plugin.xml
+@@ -1,26 +1,26 @@
+ <?xml version='1.0' encoding='utf-8'?>
+-<plugin id="cordova-plugin-pico" version="1.0.3" xmlns="http://apache.org/cordova/ns/plugins/1.0">
++<plugin id="cordova-plugin-pico" version="1.0.4" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+ 
+     <name>Pico-Plugin</name>
+ 
+ 
+     <js-module name="PicoPlugin" src="www/PicoPlugin.js">
+-        <clobbers target="PicoPlugin"/>
++        <clobbers target="PicoPlugin" />
+     </js-module>
+ 
+     <platform name="ios">
+         <config-file parent="/*" target="config.xml">
+             <feature name="PicoPlugin">
+-                <param name="ios-package" value="PicoPlugin" onload="true"/>
++                <param name="ios-package" value="PicoPlugin" onload="true" />
+                 <!-- <param name="onload" value="true"/> -->
+             </feature>
+         </config-file>
+ 
+-        <config-file target="*-Info.plist" parent="UIBackgroundModes"/>
++        <config-file target="*-Info.plist" parent="UIBackgroundModes" />
+         <resource-file src="src/ios/PicoPluginConfig.plist" />
+ 
+-        <source-file src="src/ios/PicoPlugin.m"/>
+-        <header-file src="src/ios/PicoPlugin.h"/>
++        <source-file src="src/ios/PicoPlugin.m" />
++        <header-file src="src/ios/PicoPlugin.h" />
+ 
+         <header-file src="src/ios/PicoSDK.h" />
+         <header-file src="src/ios/CUSwatchMatcher.h" />
+@@ -31,29 +31,32 @@
+         <header-file src="src/ios/CUMatch.h" />
+         <header-file src="src/ios/CULAB.h" />
+         <!-- framework -->
+-        <source-file src="src/ios/libPicoSDK.a" framework="true"/>
++        <source-file src="src/ios/libPicoSDK.a" framework="true" />
+ 
+         <!-- iOS SPermissions -->
+-       <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
+-       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothPeripheralUsageDescription">
+-           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+-       </config-file>
+-       <config-file target="src/ios/PicoPluginConfig.plist" parent="NSBluetoothAlwaysUsageDescription">
+-           <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+-       </config-file>
++        <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" " />
++        <config-file target="src/ios/PicoPluginConfig.plist"
++            parent="NSBluetoothPeripheralUsageDescription">
++            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
++        </config-file>
++        <config-file target="src/ios/PicoPluginConfig.plist"
++            parent="NSBluetoothAlwaysUsageDescription">
++            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
++        </config-file>
+ 
+     </platform>
+ 
+ 
+     <platform name="android">
+-        <framework src="src/android/PicoPlugin.gradle" custom="true" type="gradleReference"/>
++        <framework src="src/android/PicoPlugin.gradle" custom="true" type="gradleReference" />
+         <config-file parent="/*" target="res/xml/config.xml">
+             <feature name="PicoPlugin">
+-                <param name="android-package" value="cordova.plugin.pico.PicoPlugin"/>
++                <param name="android-package" value="cordova.plugin.pico.PicoPlugin" />
+             </feature>
+         </config-file>
+         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+-        <source-file src="src/android/PicoPlugin.java" target-dir="src/cordova/plugin/pico/PicoPlugin"/>
+-        <lib-file src="src/android/PicoIO.aar"/>
++        <source-file src="src/android/PicoPlugin.java"
++            target-dir="src/cordova/plugin/pico/PicoPlugin" />
++        <lib-file src="src/android/PicoIO.aar" />
+     </platform>
+-</plugin>
++</plugin>
+\ No newline at end of file
+diff --git a/src/android/PicoPlugin.java b/src/android/PicoPlugin.java
+index 1d794c9..b18670d 100644
+--- a/src/android/PicoPlugin.java
++++ b/src/android/PicoPlugin.java
+@@ -55,13 +55,18 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+     private CallbackContext _curConnectCallbackContext = null;
+     private CallbackContext _curDisconnectCallbackContext = null;
+     private CallbackContext _curScanCallbackContext = null;
++    private CallbackContext _curScanRawCallbackContext = null;
+     private CallbackContext _curCalibrateCallbackContext = null;
+ 
++    // Flag to indicate if the current sensor data request is for raw scan
++    private boolean _isRawScanRequest = false;
++
+     // Message Broadcaster
+     private final Intent errorIntent = new Intent("error");
+     private final Intent connectionIntent = new Intent("connection");
+     private final Intent calibrationIntent = new Intent("calibration");
+     private final Intent labIntent = new Intent("labScan");
++    private final Intent rawScanIntent = new Intent("rawScan");
+     private final Intent sensorDataIntent = new Intent("sensorData");
+     private final Intent batteryLevelIntent = new Intent("batteryLevel");
+     private final Intent batteryStatusIntent = new Intent("batteryStatus");
+@@ -91,22 +96,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+ 
+         if(action.equals("destroy")) {
+             this.destroy(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("connect")) {
+             this.onConnectClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("disconnect")) {
+             this.onDisconnectClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("scan")) {
+             this.onScanClick(callbackContext);
++            return true;
++        }
++
++        if(action.equals("scanRaw")) {
++            this.onScanRawClick(callbackContext);
++            return true;
+         }
+ 
+         if(action.equals("calibrate")) {
+             this.onCalibrateClick(callbackContext);
++            return true;
+         }
+ 
+         return false;
+@@ -187,11 +202,32 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onScanClick(CallbackContext callbackContext) {
+         log("Scan clicked");
+-        if (_pico != null)
++        if (_pico != null) {
+             _curScanCallbackContext = callbackContext;
++            // lab values with led support
++            _pico.sendLabDataRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
++    }
+ 
+-        // lab values with led support
+-        _pico.sendLabDataRequest();
++    /**
++     * scan raw data - uses LAB request to fire LEDs, then captures sensor data
++     * Note: Android SDK doesn't support raw data with per-LED firing like iOS
++     * We use LAB request (fires LEDs) then sensor data request to get RGB values
++     */
++    public void onScanRawClick(CallbackContext callbackContext) {
++        log("Scan Raw clicked");
++        if (_pico != null) {
++            _curScanRawCallbackContext = callbackContext;
++            _isRawScanRequest = true;
++            // Use LAB request to fire LEDs, sensor data will follow in onFetchLabData
++            _pico.sendLabDataRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
+     }
+ 
+     /**
+@@ -199,9 +235,13 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+      */
+     public void onCalibrateClick(CallbackContext callbackContext) {
+         log("Calibration clicked");
+-        if (_pico != null)
++        if (_pico != null) {
+             _curCalibrateCallbackContext = callbackContext;
+-        _pico.sendCalibrationRequest();
++            _pico.sendCalibrationRequest();
++        } else {
++            log("Error: Pico not connected");
++            callbackContext.error("Pico not connected");
++        }
+     }
+ 
+     /**
+@@ -347,11 +387,56 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+     @Override
+     public void onFetchLabData(Pico pico, LAB lab) {
+         log("Received LAB: " + lab.toString());
++        
++        // For raw scan requests, convert LAB to sensor-scale raw values
++        // Android SDK doesn't support per-LED raw readings like iOS
++        if (_isRawScanRequest) {
++            _isRawScanRequest = false;
++            log("Raw scan request - converting LAB to raw sensor scale");
++            
++            // Convert LAB to RGB (0-1 range)
++            double[] rgbNorm = labToRgbNormalized(lab.l, lab.a, lab.b);
++            
++            // Scale to sensor raw values using typical white standards:
++            // rwr=2000, gwg=2500, bwb=3660
++            // The app normalizes: value/whiteStandard * 255
++            // So we need: rgbNorm * whiteStandard
++            int rawR = (int) Math.round(rgbNorm[0] * 2000);  // Red LED, R sensor
++            int rawG = (int) Math.round(rgbNorm[1] * 2500);  // Green LED, G sensor  
++            int rawB = (int) Math.round(rgbNorm[2] * 3660);  // Blue LED, B sensor
++            
++            log("Converted RGB normalized: [" + rgbNorm[0] + ", " + rgbNorm[1] + ", " + rgbNorm[2] + "]");
++            log("Converted to raw scale: [" + rawR + ", " + rawG + ", " + rawB + "]");
++            
++            if (_curScanRawCallbackContext != null) {
++                // Format as array: [R.R, R.G, R.B, G.R, G.G, G.B, B.R, B.G, B.B]
++                // Only diagonal values matter for the app's rawRgbToRgb function
++                int[] rawData = new int[] {
++                    rawR, 0, 0,     // Red LED: only R sensor matters
++                    0, rawG, 0,     // Green LED: only G sensor matters
++                    0, 0, rawB      // Blue LED: only B sensor matters
++                };
++                _curScanRawCallbackContext.success(java.util.Arrays.toString(rawData));
++            }
++
++            // broadcast raw scan data
++            final Bundle rawScanBundle = new Bundle();
++            int[] rawData = new int[] {
++                rawR, 0, 0,
++                0, rawG, 0,
++                0, 0, rawB
++            };
++            rawScanBundle.putIntArray("raw", rawData);
++            rawScanIntent.putExtras(rawScanBundle);
++            LocalBroadcastManager.getInstance(activity).sendBroadcastSync(rawScanIntent);
++            return;
++        }
++        
+         if (_curScanCallbackContext != null) {
+             _curScanCallbackContext.success(lab.toString());
+         }
+ 
+-        // additionally get raw sensor data without firing leds
++        // additionally get raw sensor data (for sensorData broadcast)
+         _pico.sendSensorDataRequest();
+ 
+         // broadcast lab
+@@ -364,12 +449,58 @@ public class PicoPlugin extends CordovaPlugin implements PicoConnectorListener,
+         labIntent.putExtras(labBundle);
+         LocalBroadcastManager.getInstance(activity).sendBroadcastSync(labIntent);
+     }
++    
++    /**
++     * Convert LAB color space to normalized RGB (0-1 range)
++     * Standard D65 illuminant conversion
++     */
++    private double[] labToRgbNormalized(float l, float a, float b) {
++        // LAB to XYZ
++        double y = (l + 16.0) / 116.0;
++        double x = a / 500.0 + y;
++        double z = y - b / 200.0;
++        
++        // Apply inverse f function
++        double x3 = x * x * x;
++        double y3 = y * y * y;
++        double z3 = z * z * z;
++        
++        x = x3 > 0.008856 ? x3 : (x - 16.0/116.0) / 7.787;
++        y = y3 > 0.008856 ? y3 : (y - 16.0/116.0) / 7.787;
++        z = z3 > 0.008856 ? z3 : (z - 16.0/116.0) / 7.787;
++        
++        // D65 reference white
++        x *= 95.047;
++        y *= 100.0;
++        z *= 108.883;
++        
++        // XYZ to RGB
++        x /= 100.0;
++        y /= 100.0;
++        z /= 100.0;
++        
++        double r = x * 3.2406 + y * -1.5372 + z * -0.4986;
++        double g = x * -0.9689 + y * 1.8758 + z * 0.0415;
++        double bVal = x * 0.0557 + y * -0.2040 + z * 1.0570;
++        
++        // Apply gamma correction
++        r = r > 0.0031308 ? 1.055 * Math.pow(r, 1.0/2.4) - 0.055 : 12.92 * r;
++        g = g > 0.0031308 ? 1.055 * Math.pow(g, 1.0/2.4) - 0.055 : 12.92 * g;
++        bVal = bVal > 0.0031308 ? 1.055 * Math.pow(bVal, 1.0/2.4) - 0.055 : 12.92 * bVal;
++        
++        // Clamp to 0-1 range and return normalized values
++        double rNorm = Math.max(0, Math.min(1, r));
++        double gNorm = Math.max(0, Math.min(1, g));
++        double bNorm = Math.max(0, Math.min(1, bVal));
++        
++        return new double[] { rNorm, gNorm, bNorm };
++    }
+ 
+     @Override
+     public void onFetchSensorData(Pico pico, SensorData sensorData) {
+         log("Received Sensor Data: " + sensorData.toString());
+ 
+-        // broadcast sensor data
++        // Regular sensor data broadcast (raw scans are now handled in onFetchLabData)
+         final Bundle sensorDataBundle = new Bundle();
+         final Bundle singleSensorDataParts = new Bundle();
+         singleSensorDataParts.putInt("r", sensorData.r);
