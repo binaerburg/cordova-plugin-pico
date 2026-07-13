@@ -7,7 +7,7 @@ allprojects {
 }
 
 dependencies {
-  implementation(name:'PicoIO', ext:'aar')
+  implementation(name:'PicoIO-v2', ext:'aar')
 }
 
 android {
